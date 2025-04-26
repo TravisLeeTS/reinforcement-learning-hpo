@@ -42,9 +42,9 @@ from ray import tune
 from ray.tune.schedulers import PopulationBasedTraining
 
 # Import project modules
-from agent_builder import RainbowDQNAgent, AgentBuilder
-from env_builder import EnvironmentBuilder
-from analyzer import Analyzer
+from src.rainbow_hpo.agent_builder import RainbowDQNAgent, AgentBuilder
+from src.rainbow_hpo.env_builder import EnvironmentBuilder
+from src.rainbow_hpo.analyzer import Analyzer
 
 # Configure logging
 os.makedirs("logs", exist_ok=True)
@@ -71,7 +71,8 @@ class HPOComparison:
         random_seed: int = 42,
         output_dir: str = "comparison_results",
         early_stopping_threshold: Optional[float] = None,
-        patience: int = 3
+        patience: int = 3,
+        use_gpu: bool = True  # New parameter to control GPU usage
     ):
         """
         Initialize the HPO comparison.
@@ -85,6 +86,7 @@ class HPOComparison:
             output_dir: Directory to save comparison results
             early_stopping_threshold: Reward threshold for early stopping (None to disable)
             patience: Number of consecutive trials without improvement before stopping
+            use_gpu: Whether to use GPU for training (if available)
         """
         self.env_id = env_id
         self.n_trials = n_trials
@@ -94,6 +96,7 @@ class HPOComparison:
         self.output_dir = output_dir
         self.early_stopping_threshold = early_stopping_threshold
         self.patience = patience
+        self.use_gpu = use_gpu and torch.cuda.is_available()  # Ensure GPU is actually available
         
         # Create output directory
         self.base_dir = os.path.join(output_dir, f"{env_id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}")
@@ -120,6 +123,10 @@ class HPOComparison:
         np.random.seed(random_seed)
         torch.manual_seed(random_seed)
         
+        # Set device for PyTorch
+        self.device = torch.device("cuda" if self.use_gpu else "cpu")
+        logger.info(f"Using device: {self.device}")
+        
         # Save configuration
         self.config = {
             "env_id": env_id,
@@ -129,6 +136,8 @@ class HPOComparison:
             "random_seed": random_seed,
             "early_stopping_threshold": early_stopping_threshold,
             "patience": patience,
+            "use_gpu": self.use_gpu,
+            "device": str(self.device),
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
         
@@ -196,7 +205,8 @@ class HPOComparison:
             train_env.observation_space,
             train_env.action_space,
             params,
-            seed=seed
+            seed=seed,
+            device=self.device  # Pass the device to the agent builder
         )
         
         # Training metrics
@@ -913,10 +923,13 @@ class HPOComparison:
         # Run PBT
         population_size = min(self.n_trials, 10)  # Use a reasonable population size
         
+        # Calculate GPU resources per trial
+        gpu_per_trial = 0.25 if self.use_gpu else 0  # Use 1/4 GPU per trial if available
+        
         tuner = tune.Tuner(
             tune.with_resources(
                 tune.with_parameters(pbt_objective),
-                resources={"cpu": 1, "gpu": 0.25 if torch.cuda.is_available() else 0}
+                resources={"cpu": 1, "gpu": gpu_per_trial}  # Updated to use configured GPU setting
             ),
             run_config=tune.RunConfig(
                 name="pbt_rainbow",
@@ -1088,7 +1101,7 @@ class HPOComparison:
             f.write(f"## Experiment Configuration\n\n")
             f.write(f"- **Environment:** {self.env_id}\n")
             f.write(f"- **Number of trials:** {self.n_trials}\n")
-            f.write(f"- **Number of seeds per trial:** {self.n_seeds}\n")
+            f.write(f"- **Number of seeds:** {self.n_seeds}\n")
             f.write(f"- **Budget per trial:** {self.budget_per_trial} environment steps\n")
             f.write(f"- **Random seed:** {self.random_seed}\n\n")
             

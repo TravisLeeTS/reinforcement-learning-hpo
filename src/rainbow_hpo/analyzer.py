@@ -1,575 +1,514 @@
 """
-Analyzer module for Rainbow DQN HPO project.
-Provides visualization and analysis tools for hyperparameter tuning results.
+Analyzer module for processing and comparing experiment results.
 """
 
+import os
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
 import json
-import os
 import logging
-from typing import Dict, Any, List, Optional, Tuple, Union
-import pickle
-from scipy import stats
-from sklearn.decomposition import PCA
-from sklearn.manifold import TSNE
-import plotly.express as px
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-from dataclasses import dataclass
+import glob
+from typing import Dict, List, Any, Optional, Tuple, Union
+import matplotlib.pyplot as plt
+from pathlib import Path
 
-# Configure logging
-os.makedirs("logs", exist_ok=True)
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[logging.FileHandler("logs/analyzer.log"), logging.StreamHandler()]
+from utils.visualization import (
+    plot_training_curve, 
+    plot_loss_curve, 
+    plot_hyperparameter_comparison, 
+    plot_parameter_importance,
+    create_comparison_report
 )
+
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class HPOAnalysisResult:
-    """Container for hyperparameter optimization analysis results."""
-    best_params: Dict[str, Any]
-    param_importance: Dict[str, float]
-    performance_over_time: pd.DataFrame
-    param_correlations: pd.DataFrame
-    pca_components: Optional[np.ndarray] = None
-    clustering_labels: Optional[np.ndarray] = None
-    resource_usage_stats: Optional[Dict[str, Any]] = None
-
-
-class HPOAnalyzer:
-    """
-    Analyzer for hyperparameter optimization results.
-    Provides methods for visualization and analysis of HPO trials.
-    """
+class ExperimentAnalyzer:
+    """Class for analyzing reinforcement learning experiment results."""
     
-    def __init__(self, results_path: str, output_dir: str = "analysis_results"):
+    def __init__(self, base_dir: str = "models"):
         """
-        Initialize the HPOAnalyzer.
+        Initialize the analyzer.
         
         Args:
-            results_path: Path to the HPO results file (JSON or pickle)
-            output_dir: Directory to save analysis results
+            base_dir: Base directory containing experiment results
         """
-        self.results_path = results_path
-        self.output_dir = output_dir
+        self.base_dir = base_dir
+        self.trials_data = {}
+        self.loaded_trials = []
         
-        # Create output directory
-        os.makedirs(output_dir, exist_ok=True)
-        
-        # Load results
-        self.results = self._load_results(results_path)
-        logger.info(f"Loaded {len(self.results)} trial results")
-        
-        # Convert to DataFrame for easier analysis
-        self.df = self._create_dataframe()
-        logger.info(f"Created analysis DataFrame with shape {self.df.shape}")
-    
-    def _load_results(self, path: str) -> List[Dict[str, Any]]:
+    def load_trial(self, trial_id: int) -> Dict[str, Any]:
         """
-        Load results from file.
+        Load data for a specific trial.
         
         Args:
-            path: Path to results file
+            trial_id: Trial ID
             
         Returns:
-            List of trial results
+            Dictionary with trial data
         """
-        if path.endswith(".json"):
-            with open(path, "r") as f:
-                return json.load(f)
-        elif path.endswith(".pkl"):
-            with open(path, "rb") as f:
-                return pickle.load(f)
-        else:
-            raise ValueError(f"Unsupported file format: {path}")
-    
-    def _create_dataframe(self) -> pd.DataFrame:
-        """
-        Convert results to DataFrame.
+        trial_dir = os.path.join(self.base_dir, f"trial_{trial_id}")
         
-        Returns:
-            DataFrame with trial data
-        """
-        # Extract trial data
-        trial_data = []
-        
-        for trial in self.results:
-            # Create base entry with trial ID and value
-            entry = {
-                "trial_id": trial.get("trial_id", -1),
-                "value": trial.get("value", float('nan')),
-                "duration": trial.get("duration", float('nan')),
-                "early_stopped": trial.get("early_stopped", False)
-            }
+        if not os.path.exists(trial_dir):
+            logger.error(f"Trial directory not found: {trial_dir}")
+            return {}
             
-            # Add parameters
-            params = trial.get("params", {})
-            for param_name, param_value in params.items():
-                entry[f"param_{param_name}"] = param_value
-            
-            # Add resource usage
-            resource_usage = trial.get("resource_usage", {})
-            for metric, metric_value in resource_usage.items():
-                entry[f"resource_{metric}"] = metric_value
-            
-            # Add metadata
-            metadata = trial.get("metadata", {})
-            for meta_key, meta_value in metadata.items():
-                if isinstance(meta_value, (int, float, str, bool)):
-                    entry[f"meta_{meta_key}"] = meta_value
-            
-            trial_data.append(entry)
-        
-        return pd.DataFrame(trial_data)
-    
-    def analyze(self) -> HPOAnalysisResult:
-        """
-        Perform comprehensive analysis of HPO results.
-        
-        Returns:
-            HPOAnalysisResult object with analysis results
-        """
-        # Find best trial
-        best_idx = self.df["value"].idxmax()
-        best_params = {}
-        for col in self.df.columns:
-            if col.startswith("param_"):
-                param_name = col[6:]  # Remove "param_" prefix
-                best_params[param_name] = self.df.loc[best_idx, col]
-        
-        # Calculate parameter importance (correlation with value)
-        param_importance = {}
-        param_cols = [col for col in self.df.columns if col.startswith("param_")]
-        
-        for col in param_cols:
-            param_name = col[6:]  # Remove "param_" prefix
-            
-            # Check data type for appropriate correlation method
-            if pd.api.types.is_numeric_dtype(self.df[col]):
-                corr, _ = stats.spearmanr(self.df[col], self.df["value"], nan_policy="omit")
-                if np.isnan(corr):
-                    corr = 0.0
-            else:
-                # For categorical parameters, use ANOVA
-                categories = self.df[col].unique()
-                if len(categories) > 1:
-                    groups = [self.df[self.df[col] == cat]["value"].dropna() for cat in categories]
-                    try:
-                        f_val, p_val = stats.f_oneway(*groups)
-                        corr = f_val / (1 + f_val)  # Normalize to 0-1 scale
-                    except:
-                        corr = 0.0
-                else:
-                    corr = 0.0
-            
-            param_importance[param_name] = abs(corr)
-        
-        # Sort by importance
-        param_importance = {k: v for k, v in sorted(param_importance.items(), key=lambda x: x[1], reverse=True)}
-        
-        # Performance over time
-        performance_df = self.df.sort_values("trial_id")[["trial_id", "value", "duration", "early_stopped"]]
-        performance_df["cumulative_best"] = performance_df["value"].cummax()
-        performance_df["cumulative_time"] = performance_df["duration"].cumsum()
-        
-        # Parameter correlations
-        numeric_param_cols = [col for col in param_cols if pd.api.types.is_numeric_dtype(self.df[col])]
-        if numeric_param_cols:
-            corr_df = self.df[numeric_param_cols].corr(method="spearman")
-        else:
-            corr_df = pd.DataFrame()
-        
-        # Resource usage statistics
-        resource_cols = [col for col in self.df.columns if col.startswith("resource_")]
-        resource_stats = {}
-        if resource_cols:
-            for col in resource_cols:
-                metric = col[9:]  # Remove "resource_" prefix
-                resource_stats[metric] = {
-                    "mean": self.df[col].mean(),
-                    "std": self.df[col].std(),
-                    "min": self.df[col].min(),
-                    "max": self.df[col].max()
-                }
-        
-        # Create and return analysis result
-        return HPOAnalysisResult(
-            best_params=best_params,
-            param_importance=param_importance,
-            performance_over_time=performance_df,
-            param_correlations=corr_df,
-            resource_usage_stats=resource_stats
-        )
-    
-    def visualize(self, analysis_result: Optional[HPOAnalysisResult] = None) -> None:
-        """
-        Generate visualization plots for HPO results.
-        
-        Args:
-            analysis_result: Pre-computed analysis result, or None to compute now
-        """
-        if analysis_result is None:
-            analysis_result = self.analyze()
-        
-        # Create plots directory
-        plots_dir = os.path.join(self.output_dir, "plots")
-        os.makedirs(plots_dir, exist_ok=True)
-        
-        # 1. Performance over time
-        self._plot_performance_over_time(analysis_result.performance_over_time, plots_dir)
-        
-        # 2. Parameter importance
-        self._plot_parameter_importance(analysis_result.param_importance, plots_dir)
-        
-        # 3. Parameter correlations
-        if not analysis_result.param_correlations.empty:
-            self._plot_parameter_correlations(analysis_result.param_correlations, plots_dir)
-        
-        # 4. Parameter distributions
-        self._plot_parameter_distributions(plots_dir)
-        
-        # 5. Parameter pairwise relationships
-        self._plot_parameter_pairplot(plots_dir)
-        
-        # 6. Interactive parallel coordinates plot
-        self._plot_parallel_coordinates(plots_dir)
-        
-        # 7. Resource usage
-        if analysis_result.resource_usage_stats:
-            self._plot_resource_usage(plots_dir)
-        
-        logger.info(f"Visualization plots saved to {plots_dir}")
-    
-    def _plot_performance_over_time(self, performance_df: pd.DataFrame, plots_dir: str) -> None:
-        """Plot performance metrics over time."""
-        plt.figure(figsize=(10, 6))
-        
-        plt.subplot(2, 1, 1)
-        plt.plot(performance_df["trial_id"], performance_df["value"], "o-", alpha=0.5, label="Trial Value")
-        plt.plot(performance_df["trial_id"], performance_df["cumulative_best"], "r-", label="Best Value")
-        plt.xlabel("Trial ID")
-        plt.ylabel("Value")
-        plt.legend()
-        plt.title("Performance Over Trials")
-        plt.grid(True, alpha=0.3)
-        
-        plt.subplot(2, 1, 2)
-        plt.plot(performance_df["cumulative_time"], performance_df["cumulative_best"], "g-")
-        plt.xlabel("Cumulative Time (seconds)")
-        plt.ylabel("Best Value")
-        plt.title("Best Value vs. Cumulative Time")
-        plt.grid(True, alpha=0.3)
-        
-        plt.tight_layout()
-        plt.savefig(os.path.join(plots_dir, "performance_over_time.png"), dpi=300)
-        plt.close()
-        
-        # Interactive version with plotly
-        fig = make_subplots(rows=2, cols=1, shared_xaxes=True)
-        
-        fig.add_trace(
-            go.Scatter(x=performance_df["trial_id"], y=performance_df["value"], 
-                      mode="markers+lines", name="Trial Value", opacity=0.6),
-            row=1, col=1
-        )
-        
-        fig.add_trace(
-            go.Scatter(x=performance_df["trial_id"], y=performance_df["cumulative_best"], 
-                      mode="lines", name="Best Value", line=dict(color="red", width=2)),
-            row=1, col=1
-        )
-        
-        # Add early stopped markers
-        if performance_df["early_stopped"].any():
-            early_stopped = performance_df[performance_df["early_stopped"]]
-            fig.add_trace(
-                go.Scatter(x=early_stopped["trial_id"], y=early_stopped["value"],
-                          mode="markers", name="Early Stopped", 
-                          marker=dict(color="red", symbol="x", size=10)),
-                row=1, col=1
-            )
-        
-        fig.add_trace(
-            go.Scatter(x=performance_df["cumulative_time"], y=performance_df["cumulative_best"],
-                      mode="lines", name="Best vs Time", line=dict(color="green", width=2)),
-            row=2, col=1
-        )
-        
-        fig.update_layout(
-            title="Performance Over Trials",
-            height=800,
-            xaxis2_title="Cumulative Time (seconds)",
-            yaxis_title="Value",
-            yaxis2_title="Best Value"
-        )
-        
-        fig.write_html(os.path.join(plots_dir, "performance_over_time.html"))
-    
-    def _plot_parameter_importance(self, param_importance: Dict[str, float], plots_dir: str) -> None:
-        """Plot parameter importance."""
-        plt.figure(figsize=(10, 6))
-        
-        # Convert to series for easier plotting
-        importance_series = pd.Series(param_importance).sort_values(ascending=True)
-        
-        importance_series.plot(kind="barh")
-        plt.xlabel("Importance")
-        plt.ylabel("Parameter")
-        plt.title("Parameter Importance")
-        plt.grid(True, alpha=0.3)
-        plt.tight_layout()
-        
-        plt.savefig(os.path.join(plots_dir, "parameter_importance.png"), dpi=300)
-        plt.close()
-        
-        # Interactive version with plotly
-        fig = px.bar(
-            x=list(importance_series.values),
-            y=list(importance_series.index),
-            orientation="h",
-            labels={"x": "Importance", "y": "Parameter"},
-            title="Parameter Importance"
-        )
-        
-        fig.update_layout(height=600)
-        fig.write_html(os.path.join(plots_dir, "parameter_importance.html"))
-    
-    def _plot_parameter_correlations(self, corr_df: pd.DataFrame, plots_dir: str) -> None:
-        """Plot parameter correlations heatmap."""
-        plt.figure(figsize=(10, 8))
-        
-        sns.heatmap(corr_df, annot=True, cmap="RdBu_r", vmin=-1, vmax=1, fmt=".2f")
-        plt.title("Parameter Correlations")
-        plt.tight_layout()
-        
-        plt.savefig(os.path.join(plots_dir, "parameter_correlations.png"), dpi=300)
-        plt.close()
-        
-        # Interactive version with plotly
-        fig = px.imshow(
-            corr_df,
-            color_continuous_scale="RdBu_r",
-            origin="lower",
-            labels=dict(color="Correlation"),
-            title="Parameter Correlations"
-        )
-        
-        fig.update_layout(height=800, width=800)
-        fig.write_html(os.path.join(plots_dir, "parameter_correlations.html"))
-    
-    def _plot_parameter_distributions(self, plots_dir: str) -> None:
-        """Plot parameter distributions with value coloring."""
-        param_cols = [col for col in self.df.columns if col.startswith("param_")]
-        
-        for i, col in enumerate(param_cols):
-            param_name = col[6:]  # Remove "param_" prefix
-            
-            plt.figure(figsize=(10, 6))
-            
-            if pd.api.types.is_numeric_dtype(self.df[col]):
-                # For numeric parameters, create a scatter plot
-                plt.scatter(self.df[col], self.df["value"], alpha=0.7)
-                plt.xlabel(param_name)
-                plt.ylabel("Value")
-                plt.title(f"Value vs. {param_name}")
-                plt.grid(True, alpha=0.3)
+        # Load hyperparameters
+        hyperparams_path = os.path.join(trial_dir, "hyperparameters.json")
+        hyperparams = {}
+        if os.path.exists(hyperparams_path):
+            with open(hyperparams_path, "r") as f:
+                hyperparams = json.load(f)
                 
-                # Add trend line
-                try:
-                    z = np.polyfit(self.df[col], self.df["value"], 1)
-                    p = np.poly1d(z)
-                    plt.plot(sorted(self.df[col]), p(sorted(self.df[col])), "r--", alpha=0.7)
-                except:
-                    pass
-            else:
-                # For categorical parameters, create a box plot
-                sns.boxplot(x=col, y="value", data=self.df)
-                plt.xlabel(param_name)
-                plt.ylabel("Value")
-                plt.title(f"Value Distribution by {param_name}")
-                plt.xticks(rotation=45)
+        # Load early stopping info
+        early_stopping_path = os.path.join(trial_dir, "early_stopping_info.json")
+        early_stopping_info = {}
+        if os.path.exists(early_stopping_path):
+            with open(early_stopping_path, "r") as f:
+                early_stopping_info = json.load(f)
+                
+        # Load rewards and losses
+        metrics_dir = os.path.join(trial_dir, "metrics")
+        rewards = []
+        losses = []
+        
+        rewards_path = os.path.join(metrics_dir, "rewards.csv")
+        if os.path.exists(rewards_path):
+            rewards_df = pd.read_csv(rewards_path)
+            rewards = rewards_df["reward"].tolist()
             
-            plt.tight_layout()
-            plt.savefig(os.path.join(plots_dir, f"param_{param_name}_distribution.png"), dpi=300)
-            plt.close()
+        losses_path = os.path.join(metrics_dir, "losses.csv")
+        if os.path.exists(losses_path):
+            losses_df = pd.read_csv(losses_path)
+            losses = losses_df["loss"].tolist()
             
-            # Interactive version with plotly
-            if pd.api.types.is_numeric_dtype(self.df[col]):
-                fig = px.scatter(
-                    self.df,
-                    x=col,
-                    y="value",
-                    trendline="ols",
-                    labels={col: param_name, "value": "Value"},
-                    title=f"Value vs. {param_name}"
-                )
-            else:
-                fig = px.box(
-                    self.df,
-                    x=col,
-                    y="value",
-                    labels={col: param_name, "value": "Value"},
-                    title=f"Value Distribution by {param_name}"
-                )
-            
-            fig.write_html(os.path.join(plots_dir, f"param_{param_name}_distribution.html"))
-    
-    def _plot_parameter_pairplot(self, plots_dir: str) -> None:
-        """Plot pairwise relationships between parameters."""
-        # Select numeric parameters and limit to most important ones to avoid too many plots
-        numeric_param_cols = [col for col in self.df.columns if col.startswith("param_") and pd.api.types.is_numeric_dtype(self.df[col])]
-        
-        if len(numeric_param_cols) < 2:
-            logger.info("Not enough numeric parameters for pairplot")
-            return
-        
-        # Limit to top 6 parameters if there are too many
-        if len(numeric_param_cols) > 6:
-            numeric_param_cols = numeric_param_cols[:6]
-        
-        # Add value column
-        plot_df = self.df[numeric_param_cols + ["value"]].copy()
-        
-        # Rename columns for better readability
-        rename_dict = {col: col[6:] for col in numeric_param_cols}
-        plot_df = plot_df.rename(columns=rename_dict)
-        
-        plt.figure(figsize=(12, 10))
-        sns.pairplot(plot_df, hue="value", palette="viridis", diag_kind="kde", corner=True)
-        plt.suptitle("Parameter Pairwise Relationships", y=1.02)
-        plt.tight_layout()
-        
-        plt.savefig(os.path.join(plots_dir, "parameter_pairplot.png"), dpi=300)
-        plt.close()
-    
-    def _plot_parallel_coordinates(self, plots_dir: str) -> None:
-        """Create interactive parallel coordinates plot."""
-        # Get parameter columns
-        param_cols = [col for col in self.df.columns if col.startswith("param_")]
-        
-        if not param_cols:
-            return
-        
-        # Prepare data
-        plot_df = self.df[param_cols + ["value", "trial_id"]].copy()
-        
-        # Rename columns for better readability
-        rename_dict = {col: col[6:] for col in param_cols}
-        plot_df = plot_df.rename(columns=rename_dict)
-        
-        # Create parallel coordinates plot
-        fig = px.parallel_coordinates(
-            plot_df,
-            color="value",
-            color_continuous_scale=px.colors.sequential.Viridis,
-            title="Parameter Relationships (Parallel Coordinates)",
-            labels={col: col for col in plot_df.columns}
-        )
-        
-        fig.update_layout(
-            font=dict(size=10),
-            height=600,
-            coloraxis_colorbar=dict(title="Value")
-        )
-        
-        fig.write_html(os.path.join(plots_dir, "parallel_coordinates.html"))
-    
-    def _plot_resource_usage(self, plots_dir: str) -> None:
-        """Plot resource usage metrics."""
-        # Get resource columns
-        resource_cols = [col for col in self.df.columns if col.startswith("resource_")]
-        
-        if not resource_cols:
-            return
-        
-        # Create plot
-        plt.figure(figsize=(12, 8))
-        
-        for i, col in enumerate(resource_cols):
-            metric = col[9:]  # Remove "resource_" prefix
-            
-            plt.subplot(len(resource_cols), 1, i+1)
-            plt.plot(self.df["trial_id"], self.df[col], "o-", alpha=0.7)
-            plt.xlabel("Trial ID" if i == len(resource_cols)-1 else "")
-            plt.ylabel(metric)
-            plt.grid(True, alpha=0.3)
-        
-        plt.suptitle("Resource Usage Over Trials")
-        plt.tight_layout()
-        
-        plt.savefig(os.path.join(plots_dir, "resource_usage.png"), dpi=300)
-        plt.close()
-        
-        # Interactive version with plotly
-        fig = make_subplots(rows=len(resource_cols), cols=1, shared_xaxes=True)
-        
-        for i, col in enumerate(resource_cols):
-            metric = col[9:]  # Remove "resource_" prefix
-            
-            fig.add_trace(
-                go.Scatter(x=self.df["trial_id"], y=self.df[col], mode="lines+markers", name=metric),
-                row=i+1, col=1
-            )
-            
-            fig.update_yaxes(title_text=metric, row=i+1, col=1)
-        
-        fig.update_layout(
-            height=200 * len(resource_cols),
-            title_text="Resource Usage Over Trials",
-            showlegend=True,
-            xaxis_title="Trial ID"
-        )
-        
-        fig.write_html(os.path.join(plots_dir, "resource_usage.html"))
-    
-    def export_results(self, analysis_result: Optional[HPOAnalysisResult] = None) -> None:
-        """
-        Export analysis results to various formats.
-        
-        Args:
-            analysis_result: Pre-computed analysis result, or None to compute now
-        """
-        if analysis_result is None:
-            analysis_result = self.analyze()
-        
-        # Export to JSON
-        export_data = {
-            "best_params": analysis_result.best_params,
-            "param_importance": analysis_result.param_importance,
-            "performance_over_time": analysis_result.performance_over_time.to_dict(orient="records"),
-            "resource_usage_stats": analysis_result.resource_usage_stats
+        # Combine all data
+        trial_data = {
+            "trial_id": trial_id,
+            "hyperparams": hyperparams,
+            "early_stopping_info": early_stopping_info,
+            "rewards": rewards,
+            "losses": losses,
         }
         
-        json_path = os.path.join(self.output_dir, "analysis_results.json")
-        with open(json_path, "w") as f:
-            json.dump(export_data, f, indent=4)
+        self.trials_data[trial_id] = trial_data
+        self.loaded_trials.append(trial_id)
         
-        # Export to CSV
-        csv_path = os.path.join(self.output_dir, "trial_data.csv")
-        self.df.to_csv(csv_path, index=False)
+        logger.info(f"Loaded data for trial {trial_id}")
+        return trial_data
+    
+    def load_all_trials(self) -> Dict[int, Dict[str, Any]]:
+        """
+        Load data for all available trials.
         
-        logger.info(f"Analysis results exported to {self.output_dir}")
+        Returns:
+            Dictionary mapping trial IDs to trial data
+        """
+        # Find all trial directories
+        trial_dirs = glob.glob(os.path.join(self.base_dir, "trial_*"))
+        
+        for trial_dir in trial_dirs:
+            try:
+                # Extract trial ID from directory name
+                trial_id = int(os.path.basename(trial_dir).split("_")[1])
+                self.load_trial(trial_id)
+            except ValueError:
+                # Skip directories that don't follow the trial_# naming convention
+                continue
+                
+        logger.info(f"Loaded data for {len(self.loaded_trials)} trials")
+        return self.trials_data
+    
+    def get_best_trial(self, metric: str = "best_eval_reward") -> Tuple[int, Dict[str, Any]]:
+        """
+        Find the best trial based on a given metric.
+        
+        Args:
+            metric: Metric to use for comparison
+            
+        Returns:
+            Tuple of (best_trial_id, best_trial_data)
+        """
+        if not self.trials_data:
+            logger.warning("No trials loaded. Loading all trials...")
+            self.load_all_trials()
+            
+        best_trial_id = -1
+        best_value = float('-inf')
+        
+        for trial_id, data in self.trials_data.items():
+            # Check in early stopping info first
+            if "early_stopping_info" in data and metric in data["early_stopping_info"]:
+                value = data["early_stopping_info"][metric]
+            # Then check directly in the data dictionary
+            elif metric in data:
+                value = data[metric]
+            else:
+                logger.warning(f"Metric {metric} not found for trial {trial_id}")
+                continue
+                
+            if value > best_value:
+                best_value = value
+                best_trial_id = trial_id
+                
+        if best_trial_id == -1:
+            logger.error(f"No trials found with metric {metric}")
+            return -1, {}
+            
+        logger.info(f"Best trial by {metric}: {best_trial_id} with value {best_value}")
+        return best_trial_id, self.trials_data[best_trial_id]
+    
+    def compare_trials(self, trial_ids: Optional[List[int]] = None, metric: str = "best_eval_reward") -> pd.DataFrame:
+        """
+        Compare multiple trials based on a given metric.
+        
+        Args:
+            trial_ids: List of trial IDs to compare (None for all loaded trials)
+            metric: Metric to use for comparison
+            
+        Returns:
+            DataFrame with comparison results
+        """
+        if trial_ids is None:
+            trial_ids = self.loaded_trials
+            
+        # Load trials if not already loaded
+        for trial_id in trial_ids:
+            if trial_id not in self.trials_data:
+                self.load_trial(trial_id)
+                
+        # Prepare comparison data
+        comparison_data = []
+        
+        for trial_id in trial_ids:
+            if trial_id not in self.trials_data:
+                logger.warning(f"Trial {trial_id} not found")
+                continue
+                
+            data = self.trials_data[trial_id]
+            
+            # Extract relevant metrics
+            if "early_stopping_info" in data:
+                early_info = data["early_stopping_info"]
+                best_reward = early_info.get("best_eval_reward", None)
+                final_reward = early_info.get("final_eval_reward", None)
+                training_time = early_info.get("training_time_seconds", None)
+                completed_episodes = early_info.get("completed_episodes", None)
+            else:
+                best_reward = None
+                final_reward = None
+                training_time = None
+                completed_episodes = None
+                
+            # Calculate training stats if rewards are available
+            if "rewards" in data and data["rewards"]:
+                rewards = data["rewards"]
+                mean_reward = np.mean(rewards)
+                max_reward = np.max(rewards)
+                min_reward = np.min(rewards)
+                final_training_reward = rewards[-1]
+            else:
+                mean_reward = None
+                max_reward = None
+                min_reward = None
+                final_training_reward = None
+                
+            # Get hyperparameters
+            hyperparams = data.get("hyperparams", {})
+            
+            # Create row data
+            row_data = {
+                "trial_id": trial_id,
+                "best_eval_reward": best_reward,
+                "final_eval_reward": final_reward,
+                "mean_training_reward": mean_reward,
+                "max_training_reward": max_reward,
+                "min_training_reward": min_reward,
+                "final_training_reward": final_training_reward,
+                "training_time_seconds": training_time,
+                "completed_episodes": completed_episodes
+            }
+            
+            # Add hyperparameters
+            for key, value in hyperparams.items():
+                row_data[f"param_{key}"] = value
+                
+            comparison_data.append(row_data)
+            
+        # Create DataFrame
+        df = pd.DataFrame(comparison_data)
+        
+        # Sort by specified metric if available
+        if metric in df.columns:
+            df = df.sort_values(metric, ascending=False)
+            
+        return df
+    
+    def create_trial_report(self, trial_id: int, output_dir: Optional[str] = None) -> str:
+        """
+        Create a detailed report for a single trial.
+        
+        Args:
+            trial_id: Trial ID
+            output_dir: Output directory (None for trial directory)
+            
+        Returns:
+            Path to the generated report
+        """
+        if trial_id not in self.trials_data:
+            self.load_trial(trial_id)
+            
+        if trial_id not in self.trials_data:
+            logger.error(f"Could not load data for trial {trial_id}")
+            return ""
+            
+        data = self.trials_data[trial_id]
+        
+        # Set output directory
+        if output_dir is None:
+            output_dir = os.path.join(self.base_dir, f"trial_{trial_id}")
+            
+        os.makedirs(output_dir, exist_ok=True)
+        
+        # Create plots if rewards available
+        if "rewards" in data and data["rewards"]:
+            rewards_plot_path = os.path.join(output_dir, "rewards_plot.png")
+            plot_training_curve(
+                data["rewards"], 
+                title=f"Training Rewards (Trial {trial_id})",
+                save_path=rewards_plot_path
+            )
+            
+        # Create loss plot if losses available
+        if "losses" in data and data["losses"]:
+            losses_plot_path = os.path.join(output_dir, "losses_plot.png")
+            plot_loss_curve(
+                data["losses"], 
+                title=f"Training Losses (Trial {trial_id})",
+                save_path=losses_plot_path
+            )
+            
+        # Generate report HTML
+        report_path = os.path.join(output_dir, f"trial_{trial_id}_report.html")
+        
+        with open(report_path, "w") as f:
+            f.write("<html><head>\n")
+            f.write("<style>\n")
+            f.write("body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }\n")
+            f.write("h1, h2, h3 { color: #333; }\n")
+            f.write("table { border-collapse: collapse; width: 100%; margin: 20px 0; }\n")
+            f.write("th, td { text-align: left; padding: 12px; border-bottom: 1px solid #ddd; }\n")
+            f.write("th { background-color: #f2f2f2; }\n")
+            f.write("img { max-width: 100%; height: auto; margin: 20px 0; }\n")
+            f.write("</style>\n")
+            f.write("</head><body>\n")
+            
+            # Header
+            f.write(f"<h1>Trial {trial_id} Report</h1>\n")
+            
+            # Performance summary
+            f.write("<h2>Performance Summary</h2>\n")
+            f.write("<table>\n")
+            
+            # Extract metrics from early stopping info
+            if "early_stopping_info" in data:
+                info = data["early_stopping_info"]
+                early_metrics = [
+                    ("Best Evaluation Reward", info.get("best_eval_reward", "N/A")),
+                    ("Final Evaluation Reward", info.get("final_eval_reward", "N/A")),
+                    ("Training Time (seconds)", info.get("training_time_seconds", "N/A")),
+                    ("Completed Episodes", info.get("completed_episodes", "N/A")),
+                    ("Early Stopping Threshold Reached", "Yes" if info.get("threshold_reached", False) else "No"),
+                    ("Early Stopping Threshold", info.get("early_stopping_threshold", "N/A")),
+                    ("Patience", info.get("patience", "N/A"))
+                ]
+                
+                for name, value in early_metrics:
+                    if isinstance(value, (int, float)) and not isinstance(value, bool):
+                        formatted_value = f"{value:.4f}" if abs(value) < 1000 else f"{value:.2f}"
+                    else:
+                        formatted_value = str(value)
+                    f.write(f"<tr><td>{name}</td><td>{formatted_value}</td></tr>\n")
+            
+            # Add training metrics
+            if "rewards" in data and data["rewards"]:
+                rewards = data["rewards"]
+                training_metrics = [
+                    ("Mean Training Reward", f"{np.mean(rewards):.4f}"),
+                    ("Max Training Reward", f"{np.max(rewards):.4f}"),
+                    ("Min Training Reward", f"{np.min(rewards):.4f}"),
+                    ("Final Training Reward", f"{rewards[-1]:.4f}"),
+                    ("Total Training Episodes", len(rewards))
+                ]
+                
+                for name, value in training_metrics:
+                    f.write(f"<tr><td>{name}</td><td>{value}</td></tr>\n")
+                    
+            f.write("</table>\n")
+            
+            # Hyperparameters
+            f.write("<h2>Hyperparameters</h2>\n")
+            f.write("<table>\n")
+            f.write("<tr><th>Parameter</th><th>Value</th></tr>\n")
+            
+            if "hyperparams" in data:
+                for param, value in data["hyperparams"].items():
+                    if isinstance(value, (int, float)) and not isinstance(value, bool):
+                        formatted_value = f"{value:.6f}" if abs(value) < 1000 else f"{value:.2f}"
+                    else:
+                        formatted_value = str(value)
+                    f.write(f"<tr><td>{param}</td><td>{formatted_value}</td></tr>\n")
+                    
+            f.write("</table>\n")
+            
+            # Plots
+            f.write("<h2>Training Plots</h2>\n")
+            
+            if "rewards" in data and data["rewards"]:
+                f.write("<h3>Rewards</h3>\n")
+                f.write(f'<img src="rewards_plot.png" alt="Training Rewards">\n')
+                
+            if "losses" in data and data["losses"]:
+                f.write("<h3>Losses</h3>\n")
+                f.write(f'<img src="losses_plot.png" alt="Training Losses">\n')
+                
+            f.write("</body></html>\n")
+            
+        logger.info(f"Trial report generated at {report_path}")
+        return report_path
+    
+    def create_comparison_report(self, trial_ids: Optional[List[int]] = None, 
+                                output_path: Optional[str] = None) -> str:
+        """
+        Create a comparison report for multiple trials.
+        
+        Args:
+            trial_ids: List of trial IDs to compare (None for all loaded trials)
+            output_path: Path to save the report
+            
+        Returns:
+            Path to the generated report
+        """
+        if trial_ids is None:
+            if not self.loaded_trials:
+                self.load_all_trials()
+            trial_ids = self.loaded_trials
+            
+        # Ensure all trials are loaded
+        for trial_id in trial_ids:
+            if trial_id not in self.trials_data:
+                self.load_trial(trial_id)
+                
+        # Get default output path if not specified
+        if output_path is None:
+            output_path = os.path.join(self.base_dir, "trial_comparison_report.html")
+            
+        # Create comparison report using the visualization utility
+        return create_comparison_report(self.base_dir, trial_ids, output_path)
+    
+    def analyze_hyperparameter_importance(self, metric: str = "best_eval_reward") -> Dict[str, float]:
+        """
+        Analyze the importance of different hyperparameters.
+        
+        Args:
+            metric: Metric to use for analysis
+            
+        Returns:
+            Dictionary mapping parameter names to importance scores
+        """
+        if not self.trials_data:
+            self.load_all_trials()
+            
+        # Get comparison DataFrame
+        df = self.compare_trials(metric=metric)
+        
+        # Identify hyperparameter columns
+        hyperparam_cols = [col for col in df.columns if col.startswith("param_")]
+        
+        if not hyperparam_cols:
+            logger.warning("No hyperparameters found in trial data")
+            return {}
+            
+        # Calculate correlation between hyperparameters and metric
+        importance_scores = {}
+        
+        for param in hyperparam_cols:
+            # Skip non-numeric parameters
+            if not pd.api.types.is_numeric_dtype(df[param]):
+                continue
+                
+            # Calculate correlation
+            if metric in df.columns:
+                correlation = df[param].corr(df[metric])
+                importance_scores[param.replace("param_", "")] = abs(correlation)
+                
+        logger.info(f"Analyzed importance of {len(importance_scores)} hyperparameters")
+        return importance_scores
+    
+    def plot_hyperparameter_importance(self, output_path: Optional[str] = None) -> str:
+        """
+        Plot hyperparameter importance.
+        
+        Args:
+            output_path: Path to save the plot
+            
+        Returns:
+            Path to the saved plot
+        """
+        importance_scores = self.analyze_hyperparameter_importance()
+        
+        if not importance_scores:
+            logger.warning("No hyperparameter importance scores to plot")
+            return ""
+            
+        if output_path is None:
+            output_path = os.path.join(self.base_dir, "hyperparameter_importance.png")
+            
+        plot_parameter_importance(
+            importance_scores,
+            title="Hyperparameter Importance",
+            save_path=output_path
+        )
+        
+        logger.info(f"Hyperparameter importance plot saved to {output_path}")
+        return output_path
 
 
-if __name__ == "__main__":
-    # Simple test to verify the analyzer works
-    import sys
+def analyze_experiment(base_dir: str = "models", output_dir: Optional[str] = None):
+    """
+    Convenience function to analyze an experiment and generate reports.
     
-    if len(sys.argv) > 1:
-        results_path = sys.argv[1]
-    else:
-        results_path = "checkpoints/trial_results.json"
+    Args:
+        base_dir: Base directory containing experiment results
+        output_dir: Output directory for reports
+    """
+    analyzer = ExperimentAnalyzer(base_dir=base_dir)
     
-    analyzer = HPOAnalyzer(results_path, output_dir="analysis_results")
-    analysis_result = analyzer.analyze()
-    analyzer.visualize(analysis_result)
-    analyzer.export_results(analysis_result)
+    # Load all trial data
+    analyzer.load_all_trials()
     
-    print(f"Best parameters: {analysis_result.best_params}")
-    print(f"Parameter importance: {analysis_result.param_importance}")
+    if not analyzer.loaded_trials:
+        logger.error(f"No trial data found in {base_dir}")
+        return
+    
+    # Set output directory
+    if output_dir is None:
+        output_dir = os.path.join(base_dir, "analysis")
+        
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # Find best trial
+    best_trial_id, _ = analyzer.get_best_trial()
+    
+    # Generate individual reports for each trial
+    for trial_id in analyzer.loaded_trials:
+        analyzer.create_trial_report(trial_id, output_dir=os.path.join(output_dir, f"trial_{trial_id}"))
+        
+    # Generate comparison report
+    analyzer.create_comparison_report(output_path=os.path.join(output_dir, "trial_comparison.html"))
+    
+    # Generate hyperparameter importance plot
+    analyzer.plot_hyperparameter_importance(output_path=os.path.join(output_dir, "hyperparameter_importance.png"))
+    
+    logger.info(f"Experiment analysis completed. Results saved to {output_dir}")
+    logger.info(f"Best trial: {best_trial_id}")

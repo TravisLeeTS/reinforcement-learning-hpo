@@ -7,7 +7,8 @@ import gymnasium as gym
 import numpy as np
 import logging
 from typing import Optional, Dict, Any, Tuple, List, Union
-from gym.wrappers import AtariPreprocessing, FrameStack
+from gymnasium.wrappers import AtariPreprocessing
+# Removed problematic import and implementing our own FrameStack
 
 # Configure logging
 logging.basicConfig(
@@ -16,6 +17,62 @@ logging.basicConfig(
     handlers=[logging.FileHandler("logs/env_builder.log"), logging.StreamHandler()]
 )
 logger = logging.getLogger(__name__)
+
+
+class FrameStack(gym.ObservationWrapper):
+    """
+    Custom FrameStack implementation to avoid import issues.
+    Stacks the specified number of frames together along a new dimension.
+    """
+    def __init__(self, env, num_stack):
+        """
+        Initialize the FrameStack wrapper.
+        
+        Args:
+            env: Environment to wrap
+            num_stack: Number of frames to stack
+        """
+        super().__init__(env)
+        self.num_stack = num_stack
+        self.frames = []
+        
+        # Get the observation space shape
+        low = np.repeat(env.observation_space.low[np.newaxis, ...], num_stack, axis=0)
+        high = np.repeat(env.observation_space.high[np.newaxis, ...], num_stack, axis=0)
+        
+        # Update the observation space
+        self.observation_space = gym.spaces.Box(
+            low=low, high=high, dtype=env.observation_space.dtype
+        )
+        
+        logger.info(f"Created FrameStack wrapper with {num_stack} frames")
+        
+    def reset(self, **kwargs):
+        """Reset the environment and clear the frame buffer."""
+        observation, info = self.env.reset(**kwargs)
+        
+        # Initialize the frame buffer
+        self.frames = [observation] * self.num_stack
+        
+        return self._get_observation(), info
+    
+    def step(self, action):
+        """Take a step and update the frame buffer."""
+        observation, reward, terminated, truncated, info = self.env.step(action)
+        
+        # Update the frame buffer
+        self.frames.pop(0)
+        self.frames.append(observation)
+        
+        return self._get_observation(), reward, terminated, truncated, info
+    
+    def _get_observation(self):
+        """Return the stacked frames as a single observation."""
+        return np.stack(self.frames, axis=0)
+    
+    def observation(self, observation):
+        """Return the current stacked frames."""
+        return self._get_observation()
 
 
 class ActionDiscretizationWrapper(gym.ActionWrapper):

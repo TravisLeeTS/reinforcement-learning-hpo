@@ -799,7 +799,8 @@ class AgentBuilder:
                    observation_space: gym.spaces.Box, 
                    action_space: gym.spaces.Discrete,
                    hyperparams: Dict[str, Any],
-                   seed: int = 42) -> RainbowDQNAgent:
+                   seed: int = 42,
+                   device: torch.device = None) -> RainbowDQNAgent:
         """
         Build a Rainbow DQN agent with given hyperparameters.
         
@@ -808,6 +809,7 @@ class AgentBuilder:
             action_space: Action space from the environment
             hyperparams: Dictionary of hyperparameters
             seed: Random seed
+            device: Device to use for tensor operations (cuda or cpu)
             
         Returns:
             Configured Rainbow DQN agent
@@ -832,7 +834,8 @@ class AgentBuilder:
         
         logger.info(f"Building agent with parameters: {params}")
         
-        return RainbowDQNAgent(
+        # Create the agent
+        agent = RainbowDQNAgent(
             observation_space=observation_space,
             action_space=action_space,
             learning_rate=params["learning_rate"],
@@ -849,6 +852,18 @@ class AgentBuilder:
             v_max=params["v_max"],
             seed=seed
         )
+        
+        # Override the device if specified
+        if device is not None:
+            agent.device = device
+            # Move networks to the specified device
+            agent.policy_net = agent.policy_net.to(device)
+            agent.target_net = agent.target_net.to(device)
+            agent.support = agent.support.to(device)
+            logger.info(f"Agent using device: {device}")
+        
+        return agent
+
 
     def train_agent(self,
                   agent: RainbowDQNAgent,
@@ -980,27 +995,22 @@ class AgentBuilder:
                     
                 # Check for early stopping
                 if early_stopping_patience > 0 and no_improvement_count >= early_stopping_patience:
-                    logger.info(f"Early stopping triggered after {episode+1} episodes")
-                    early_stopped = True
-                    break
-                
-                # Check for reward threshold early stopping
-                if early_stopping_threshold is not None and mean_eval_reward >= early_stopping_threshold:
-                    logger.info(f"Early stopping threshold reached: {mean_eval_reward:.2f} >= {early_stopping_threshold:.2f}")
-                    early_stopped = True
-                    break
-                
-                # Report progress if callback provided
-                if progress_callback:
-                    callback_data = {
-                        "episode": episode + 1,
-                        "total_episodes": n_episodes,
-                        "eval_reward": mean_eval_reward,
-                        "best_reward": best_eval_reward,
-                        "no_improvement_count": no_improvement_count,
-                        "early_stopped": early_stopped
-                    }
-                    progress_callback(callback_data)
+                    if early_stopping_threshold is not None and mean_eval_reward < early_stopping_threshold:
+                        early_stopped = True
+                        logger.info("Early stopping triggered")
+                        break
+            
+            # Report progress
+            if progress_callback is not None:
+                callback_data = {
+                    "episode": episode,
+                    "training_history": training_history,
+                    "eval_reward": mean_eval_reward,
+                    "best_reward": best_eval_reward,
+                    "no_improvement_count": no_improvement_count,
+                    "early_stopped": early_stopped
+                }
+                progress_callback(callback_data)
         
         training_time = time.time() - start_time
         

@@ -1,19 +1,30 @@
-stable-baselines3
-optuna
+# Core dependencies
+numpy>=1.20.0
+torch>=1.10.0
+gymnasium>=0.28.1
 gymnasium[box2d]
 gymnasium[atari]
 gymnasium[accept-rom-license]
-torch
-matplotlib
-numpy
-plotly
-deap
-tqdm
-typing-extensions
-ale-py
-autorom[accept-rom-license]
-opencv-python
-psutil
-tensorboard
-pandas
-seaborn
+stable-baselines3>=2.0.0
+
+# HPO libraries
+optuna>=3.0.0
+deap>=1.3.3
+ray[tune]>=2.3.0
+
+# Atari dependencies
+ale-py>=0.8.0
+autorom[accept-rom-license]>=0.6.1
+
+# Utilities
+tqdm>=4.64.0
+psutil>=5.9.0
+typing-extensions>=4.4.0
+opencv-python>=4.7.0
+
+# Visualization
+matplotlib>=3.5.0
+seaborn>=0.12.0
+pandas>=1.5.0
+plotly>=5.14.0
+tensorboard>=2.12.0

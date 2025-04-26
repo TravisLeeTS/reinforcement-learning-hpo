@@ -14,6 +14,7 @@ from collections import deque
 import random
 import math
 import copy
+import time
 from functools import partial
 from dataclasses import dataclass
 
@@ -848,6 +849,174 @@ class AgentBuilder:
             v_max=params["v_max"],
             seed=seed
         )
+
+    def train_agent(self,
+                  agent: RainbowDQNAgent,
+                  env: gym.Env,
+                  n_episodes: int,
+                  max_steps_per_episode: int = 10000,
+                  eval_interval: int = 10,
+                  eval_episodes: int = 5,
+                  save_path: str = None,
+                  log_dir: str = "logs",
+                  early_stopping_patience: int = 20,
+                  early_stopping_threshold: float = None,
+                  progress_callback: Callable[[Dict[str, Any]], None] = None) -> Dict[str, Any]:
+        """
+        Train a Rainbow DQN agent.
+        
+        Args:
+            agent: Agent to train
+            env: Environment to train in
+            n_episodes: Number of episodes to train for
+            max_steps_per_episode: Maximum steps per episode
+            eval_interval: Interval to evaluate agent (in episodes)
+            eval_episodes: Number of episodes for evaluation
+            save_path: Path to save best model
+            log_dir: Directory to save training logs
+            early_stopping_patience: Number of evaluations with no improvement before stopping
+            early_stopping_threshold: Reward threshold for early stopping
+            progress_callback: Callback function for reporting progress
+            
+        Returns:
+            Dictionary containing training history and best reward
+        """
+        os.makedirs(log_dir, exist_ok=True)
+        if save_path:
+            os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        
+        training_history = {
+            "episode_rewards": [],
+            "episode_lengths": [],
+            "eval_rewards": [],
+            "eval_steps": [],
+            "losses": [],
+            "timestamps": []
+        }
+        
+        best_eval_reward = float('-inf')
+        no_improvement_count = 0
+        early_stopped = False
+        start_time = time.time()
+        
+        for episode in range(n_episodes):
+            state, _ = env.reset()
+            episode_reward = 0
+            episode_losses = []
+            steps = 0
+            done = False
+            truncated = False
+            
+            # Single episode
+            while not done and not truncated and steps < max_steps_per_episode:
+                # Select and perform action
+                action = agent.select_action(state)
+                next_state, reward, done, truncated, _ = env.step(action)
+                
+                # Store transition and optimize
+                agent.store_transition(state, action, reward, next_state, done)
+                loss = agent.optimize()
+                if loss > 0:
+                    episode_losses.append(loss)
+                
+                # Move to the next state
+                state = next_state
+                episode_reward += reward
+                steps += 1
+            
+            # Record episode stats
+            training_history["episode_rewards"].append(episode_reward)
+            training_history["episode_lengths"].append(steps)
+            training_history["timestamps"].append(time.time() - start_time)
+            
+            if episode_losses:
+                training_history["losses"].append(np.mean(episode_losses))
+            else:
+                training_history["losses"].append(0.0)
+            
+            # Evaluation phase
+            if (episode + 1) % eval_interval == 0:
+                eval_rewards = []
+                eval_lengths = []
+                
+                # Run evaluation episodes
+                for _ in range(eval_episodes):
+                    eval_state, _ = env.reset()
+                    eval_episode_reward = 0
+                    eval_steps = 0
+                    eval_done = False
+                    eval_truncated = False
+                    
+                    while not eval_done and not eval_truncated and eval_steps < max_steps_per_episode:
+                        eval_action = agent.select_action(eval_state, eval_mode=True)
+                        eval_state, eval_reward, eval_done, eval_truncated, _ = env.step(eval_action)
+                        eval_episode_reward += eval_reward
+                        eval_steps += 1
+                    
+                    eval_rewards.append(eval_episode_reward)
+                    eval_lengths.append(eval_steps)
+                
+                # Average evaluation metrics
+                mean_eval_reward = np.mean(eval_rewards)
+                training_history["eval_rewards"].append(mean_eval_reward)
+                training_history["eval_steps"].append(np.mean(eval_lengths))
+                
+                # Log progress
+                logger.info(f"Episode {episode+1}/{n_episodes}, "
+                          f"Avg. Reward: {np.mean(training_history['episode_rewards'][-eval_interval:]):.2f}, "
+                          f"Eval Reward: {mean_eval_reward:.2f}, "
+                          f"Loss: {training_history['losses'][-1]:.6f}")
+                
+                # Save best model
+                if mean_eval_reward > best_eval_reward:
+                    best_eval_reward = mean_eval_reward
+                    no_improvement_count = 0
+                    if save_path:
+                        agent.save(save_path)
+                        logger.info(f"New best model saved with reward: {best_eval_reward:.2f}")
+                else:
+                    no_improvement_count += 1
+                    logger.info(f"No improvement for {no_improvement_count} evaluations")
+                    
+                # Check for early stopping
+                if early_stopping_patience > 0 and no_improvement_count >= early_stopping_patience:
+                    logger.info(f"Early stopping triggered after {episode+1} episodes")
+                    early_stopped = True
+                    break
+                
+                # Check for reward threshold early stopping
+                if early_stopping_threshold is not None and mean_eval_reward >= early_stopping_threshold:
+                    logger.info(f"Early stopping threshold reached: {mean_eval_reward:.2f} >= {early_stopping_threshold:.2f}")
+                    early_stopped = True
+                    break
+                
+                # Report progress if callback provided
+                if progress_callback:
+                    callback_data = {
+                        "episode": episode + 1,
+                        "total_episodes": n_episodes,
+                        "eval_reward": mean_eval_reward,
+                        "best_reward": best_eval_reward,
+                        "no_improvement_count": no_improvement_count,
+                        "early_stopped": early_stopped
+                    }
+                    progress_callback(callback_data)
+        
+        training_time = time.time() - start_time
+        
+        # Final results
+        results = {
+            "training_history": training_history,
+            "best_eval_reward": best_eval_reward,
+            "training_time": training_time,
+            "early_stopped": early_stopped,
+            "total_episodes": episode + 1
+        }
+        
+        logger.info(f"Training completed. Best reward: {best_eval_reward:.2f}")
+        logger.info(f"Total training time: {training_time:.2f}s")
+        
+        return results
 
 
 if __name__ == "__main__":

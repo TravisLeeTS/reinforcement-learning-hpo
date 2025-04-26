@@ -1,109 +1,129 @@
-# Reinforcement Learning Hyperparameter Optimization
+# RL Hyperparameter Optimization Project
 
-This project implements hyperparameter optimization (HPO) for reinforcement learning algorithms on various environments from OpenAI Gym/Gymnasium.
+This project implements advanced hyperparameter optimization (HPO) for reinforcement learning algorithms, with a special focus on Rainbow DQN for both Atari games and continuous control environments.
 
 ## Features
 
-- Hyperparameter optimization using multiple techniques:
+- **Multiple HPO Techniques**:
   - Bayesian Optimization with Optuna
   - Evolutionary Algorithms with DEAP
-- Support for multiple RL algorithms:
-  - Proximal Policy Optimization (PPO)
-  - Advantage Actor-Critic (A2C)
-  - Rainbow DQN (with Double Q-learning, Dueling networks, PER, etc.)
-- Training pause feature when reward threshold is reached
-- Automatic model evaluation and saving
-- Visualization of optimization results
-- GitHub integration for easy sharing
+  - Population-Based Training with Ray Tune
+  - Grid Search for baseline comparison
+  
+- **Rainbow DQN Implementation** with all components:
+  - Double Q-learning
+  - Dueling networks
+  - Prioritized experience replay (PER)
+  - Multi-step learning
+  - Distributional RL (C51)
+  - Noisy networks
+  
+- **Advanced HPO Engine**:
+  - Automatic early stopping for inefficient trials
+  - Checkpointing for resilience against crashes
+  - Resource monitoring to prevent OOM errors
+  - Parallelization across trials for speed
+  - Parameter importance analysis
+  
+- **Comprehensive Analysis**:
+  - Statistical comparison across multiple methods
+  - Parameter importance visualization
+  - Learning curves and reward distributions
+  - Detailed performance metrics
 
-## Requirements
+- **Environment Support**:
+  - Atari games (via Gymnasium)
+  - Classic control environments
 
-All dependencies are listed in `requirements.txt`. To install:
+## Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/yourusername/rl_hpo.git
+cd rl_hpo
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-## Usage
+## Quick Start
 
-### Pendulum HPO
-
-To run the hyperparameter optimization for Pendulum:
-
+### Running HPO on a continuous control task:
 ```bash
-python src/hpo_pendulum.py
+python src/hpo_pendulum.py --optimize --n-trials 10
 ```
 
-The script will:
-1. Run multiple trials to optimize hyperparameters
-2. Save the best model and optimization results
-3. Train a final model with the best hyperparameters
-4. Offer to push the project to GitHub
-
-### Rainbow DQN HPO Comparison
-
-For comparing HPO methods on Rainbow DQN with Atari environments:
-
+### Training with the best hyperparameters found:
 ```bash
-python src/rainbow_hpo/main.py
+python src/hpo_pendulum.py --train --render
 ```
 
-This will run a comparison between Bayesian and Evolutionary optimization on the Breakout environment with 20 trials for each method.
-
-Command line arguments:
-- `--env`: Atari environment name (default: 'ALE/Breakout-v5')
-- `--trials`: Number of trials for each HPO method (default: 20)
-- `--seeds`: Number of seeds to evaluate each configuration (default: 3)
-- `--steps`: Number of training steps per trial (default: 500000)
-
-Example for quicker results:
+### For Atari environments:
 ```bash
-python src/rainbow_hpo/main.py --env ALE/Pong-v5 --trials 10 --seeds 2 --steps 250000
+python src/rainbow_hpo/atari_hpo_experiment.py --env PongNoFrameskip-v4 --bayesian
 ```
 
 ## Project Structure
 
-```
-rl_hpo/
-│
-├── requirements.txt   # Dependencies
-├── README.md          # This file
-│
-├── src/               # Source code
-│   ├── hpo_pendulum.py  # Pendulum HPO implementation
-│   ├── logs/          # Training logs for Pendulum
-│   ├── models/        # Saved models from trials
-│   │
-│   └── rainbow_hpo/   # Rainbow DQN HPO comparison
-│       ├── agent_builder.py  # Rainbow DQN implementation
-│       ├── analyzer.py       # Results visualization
-│       ├── env_builder.py    # Environment creation
-│       ├── hpo_engine.py     # HPO methods implementation
-│       ├── main.py           # Entry point
-│       ├── README.md         # Rainbow-specific documentation
-│       ├── configs/          # Configuration files
-│       ├── logs/             # Training logs
-│       └── models/           # Saved models
-│
-└── docs/              # Documentation and reports
-```
+- `src/rainbow_hpo/`: Main Rainbow DQN implementation and HPO framework
+- `src/models/`: Saved models from optimization runs
+- `src/logs/`: Training logs and evaluation results
 
-## Rainbow DQN Implementation
+For detailed documentation on the Rainbow HPO framework, see [Rainbow HPO README](src/rainbow_hpo/README.md).
 
-The Rainbow DQN implementation includes:
-- Double Q-learning
-- Dueling networks
-- Prioritized experience replay
-- Multi-step learning
-- Distributional RL (C51)
-- Noisy networks (partial)
+## GitHub Integration
 
-## Customization
+This project includes built-in GitHub integration. To push your project to GitHub:
 
-The code includes callbacks that pause training when reward thresholds are reached. You can modify these thresholds in the respective scripts.
+1. **Automatic Method**:
+   - Run the main script `src/hpo_pendulum.py`
+   - At the end of execution, you will be prompted whether you want to push to GitHub
+   - Enter 'yes' when prompted
+   - Provide your GitHub username and desired repository name
+   - The script will handle repository creation and pushing automatically
 
-To run HPO on different environments, modify the environment creation functions in the respective modules.
+2. **Manual Method**:
+   - From a Python script:
+   ```python
+   from src.hpo_pendulum import push_to_github
+   
+   # Replace with your info
+   push_to_github(repo_name="rl-hyperparameter-optimization", username="your-username")
+   ```
+
+3. **Command Line Method**:
+   ```bash
+   # Initialize Git repository
+   git init
+   
+   # Add all files
+   git add .
+   
+   # Commit changes
+   git commit -m "Initial commit: RL HPO project"
+   
+   # Add remote repository (create repository on GitHub first)
+   git remote add origin https://github.com/your-username/your-repo-name.git
+   
+   # Push to GitHub
+   git push -u origin master
+   ```
+
+The project includes a comprehensive `.gitignore` file to exclude unnecessary files from version control.
 
 ## License
 
-MIT
+This project is provided for educational and research purposes.
+
+## Citation
+
+If you use this code in your research, please cite:
+
+```
+@software{rl_hpo2025,
+  author = {Your Name},
+  title = {Reinforcement Learning Hyperparameter Optimization},
+  year = {2025},
+  url = {https://github.com/yourusername/rl_hpo}
+}
+```

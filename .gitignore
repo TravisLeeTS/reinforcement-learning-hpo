@@ -1,9 +1,71 @@
+# Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-.env
-.venv
-env/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environments
 venv/
+env/
+ENV/
+.venv/
+.env/
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+*.ipynb
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
 .DS_Store
+
+# ML specific
+# Keep only specific model checkpoints
+models/**/checkpoint_*
+models/**/*.pth
+# Except the best models
+!models/**/best_model.zip
+
+# Logs
+logs/**/debug.log
+logs/**/events.*
+logs/**/*.pkl
+# Except evaluation data
+!logs/**/evaluations.npz
+!logs/**/monitor.csv
+
+# Temporary files
+tmp/
+temp/
+.cache/
+
+# Visualization outputs
+*.png
+*.jpg
+*.jpeg
+*.svg
+*.pdf
+# Except those in documentation
+!docs/**/*.png
+!docs/**/*.jpg
+!docs/**/*.svg
+!docs/**/*.pdf

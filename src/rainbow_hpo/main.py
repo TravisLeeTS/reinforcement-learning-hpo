@@ -9,15 +9,22 @@ import argparse
 import os
 import logging
 import json
+import datetime
+import uuid
 from pathlib import Path
 
-from utils.common import set_seed, setup_logging, create_directory_if_not_exists
+from utils.common import set_seed, setup_logging, create_directory_if_not_exists, get_context_logger
 from hpo_engine import HyperparameterOptimizer
 from training import train_with_optimal_params, optimize_hyperparameters
 
-# Configure logging
-setup_logging(log_dir="logs")
+# Generate a unique run ID for this execution
+run_timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+run_id = f"{run_timestamp}_{str(uuid.uuid4())[:8]}"
+
+# Configure logging with the run ID
+setup_logging(log_dir="logs", run_id=run_id)
 logger = logging.getLogger(__name__)
+logger.info(f"Starting Rainbow DQN experiment with run_id={run_id}")
 
 
 def list_atari_games():
@@ -55,19 +62,25 @@ def main():
     # Set the seed for reproducibility
     set_seed(args.seed)
     
+    # Get contextual logger for this experiment
+    exp_logger = get_context_logger(__name__, env=args.env, seed=args.seed)
+    exp_logger.info(f"Starting experiment with environment: {args.env}")
+    
     if args.optimize:
         optimize_hyperparameters(
             n_trials=args.n_trials, 
             seed=args.seed, 
             env_id=args.env,
-            output_dir=args.output_dir
+            output_dir=args.output_dir,
+            run_id=run_id
         )
     
     if args.train:
         train_with_optimal_params(
             env_id=args.env,
             render=args.render,
-            output_dir=args.output_dir
+            output_dir=args.output_dir,
+            run_id=run_id
         )
     
     if not args.optimize and not args.train and not args.list_games:

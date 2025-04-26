@@ -1,0 +1,404 @@
+2025-04-26 12:51:38,039 [INFO] Using device: cuda
+2025-04-26 12:51:38,039 [INFO] Initialized HPO comparison with environment: PongNoFrameskip-v4
+2025-04-26 12:51:38,039 [INFO] Trials: 5, Seeds: 2, Budget: 100000
+2025-04-26 12:51:55,678 [INFO] Starting Bayesian Optimization with 5 trials
+2025-04-26 12:51:55,691 [INFO] EnvironmentBuilder initialized
+2025-04-26 12:54:15,405 [INFO] Using device: cuda
+2025-04-26 12:54:15,406 [INFO] Initialized HPO comparison with environment: PongNoFrameskip-v4
+2025-04-26 12:54:15,408 [INFO] Trials: 5, Seeds: 2, Budget: 100000
+2025-04-26 12:54:18,094 [INFO] Starting Bayesian Optimization with 5 trials
+2025-04-26 12:54:18,104 [INFO] EnvironmentBuilder initialized
+2025-04-26 12:54:18,104 [INFO] Attempting to create environment with modified ID: ALE/PongNoFrameskip-v4
+2025-04-26 13:05:57,867 [INFO] Starting Bayesian Optimization with 5 trials
+2025-04-26 13:05:57,885 [INFO] EnvironmentBuilder initialized
+2025-04-26 13:05:57,886 [INFO] Attempting to create environment with modified ID: ALE/PongNoFrameskip-v4
+2025-04-26 13:06:20,448 [INFO] Using device: cuda
+2025-04-26 13:06:20,451 [INFO] Initialized HPO comparison with environment: PongNoFrameskip-v4
+2025-04-26 13:06:20,451 [INFO] Trials: 5, Seeds: 2, Budget: 100000
+2025-04-26 13:06:23,022 [INFO] Starting Bayesian Optimization with 5 trials
+2025-04-26 13:06:23,028 [INFO] EnvironmentBuilder initialized
+2025-04-26 13:06:23,029 [WARNING] Could not import gymnasium atari environments
+2025-04-26 13:06:23,030 [INFO] Attempting to create environment with ID: PongNoFrameskip-v4
+2025-04-26 13:06:23,030 [WARNING] Failed to create environment with ID PongNoFrameskip-v4: Environment `PongNoFrameskip` doesn't exist.
+2025-04-26 13:06:23,031 [INFO] Attempting to create environment with ID: ALE/PongNoFrameskip-v4
+2025-04-26 13:06:23,032 [WARNING] Failed to create environment with ID ALE/PongNoFrameskip-v4: Namespace ALE not found. Have you installed the proper package for ALE?
+2025-04-26 13:06:23,032 [INFO] Attempting to create environment with ID: Pong-v4
+2025-04-26 13:06:23,033 [WARNING] Failed to create environment with ID Pong-v4: Environment `Pong` doesn't exist.
+2025-04-26 13:06:23,033 [INFO] Attempting to create environment with ID: ALE/Pong-v5
+2025-04-26 13:06:23,034 [WARNING] Failed to create environment with ID ALE/Pong-v5: Namespace ALE not found. Have you installed the proper package for ALE?
+2025-04-26 13:06:23,035 [INFO] Attempting to register and create a basic Pong environment
+2025-04-26 13:06:23,036 [ERROR] Fallback environment creation also failed: No module named 'gymnasium.envs.atari'
+2025-04-26 13:06:23,036 [ERROR] Failed to create any environment using ID PongNoFrameskip-v4
+2025-04-26 13:19:46,198 [INFO] Using device: cuda
+2025-04-26 13:19:46,199 [INFO] Initialized HPO comparison with environment: CartPole-v1
+2025-04-26 13:19:46,199 [INFO] Trials: 5, Seeds: 2, Budget: 100000
+2025-04-26 13:19:46,207 [INFO] Starting Bayesian Optimization with 5 trials
+2025-04-26 13:19:46,210 [INFO] EnvironmentBuilder initialized
+2025-04-26 13:19:46,248 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 13:19:46,249 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 13:19:46,257 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 13:19:46,257 [INFO] Scaling rewards by factor 0.1
+2025-04-26 13:19:46,257 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 13:19:46,260 [INFO] Limiting episode length to 1000 steps
+2025-04-26 13:19:46,260 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 13:19:46,261 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 13:19:46,261 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 13:19:46,261 [INFO] Scaling rewards by factor 0.1
+2025-04-26 13:19:46,261 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 13:19:46,264 [INFO] Limiting episode length to 1000 steps
+2025-04-26 13:19:46,264 [INFO] AgentBuilder initialized
+2025-04-26 13:19:46,265 [INFO] Building agent with parameters: {'learning_rate': 5.6115164153345e-05, 'gamma': 0.9965850010140859, 'batch_size': 32, 'target_update_freq': 594, 'epsilon_start': 0.8005575058716043, 'epsilon_end': 0.0737265320016441, 'epsilon_decay_steps': 52426, 'memory_size': 50000, 'n_steps': 5, 'n_atoms': 101, 'v_min': -12.128653525516432, 'v_max': 11.479175279631736}
+2025-04-26 13:19:46,266 [INFO] Using device: cuda
+2025-04-26 13:38:30,435 [INFO] Using device: cuda
+2025-04-26 13:38:30,435 [INFO] Initialized HPO comparison with environment: CartPole-v1
+2025-04-26 13:38:30,435 [INFO] Trials: 5, Seeds: 2, Budget: 100000
+2025-04-26 13:38:30,445 [INFO] Starting Bayesian Optimization with 5 trials
+2025-04-26 13:38:30,448 [INFO] EnvironmentBuilder initialized
+2025-04-26 13:38:30,485 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 13:38:30,485 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 13:38:30,489 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 13:38:30,489 [INFO] Scaling rewards by factor 0.1
+2025-04-26 13:38:30,489 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 13:38:30,493 [INFO] Limiting episode length to 1000 steps
+2025-04-26 13:38:30,493 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 13:38:30,493 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 13:38:30,493 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 13:38:30,493 [INFO] Scaling rewards by factor 0.1
+2025-04-26 13:38:30,493 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 13:38:30,493 [INFO] Limiting episode length to 1000 steps
+2025-04-26 13:38:30,493 [INFO] AgentBuilder initialized
+2025-04-26 13:38:30,493 [INFO] Building agent with parameters: {'learning_rate': 5.6115164153345e-05, 'gamma': 0.9965850010140859, 'batch_size': 32, 'target_update_freq': 594, 'epsilon_start': 0.8005575058716043, 'epsilon_end': 0.0737265320016441, 'epsilon_decay_steps': 52426, 'memory_size': 50000, 'n_steps': 5, 'n_atoms': 101, 'v_min': -12.128653525516432, 'v_max': 11.479175279631736}
+2025-04-26 13:38:30,497 [INFO] Using device: cuda
+2025-04-26 13:38:31,836 [INFO] Initialized PrioritizedReplayBuffer with capacity 50000, alpha=0.6, beta=0.4
+2025-04-26 13:38:31,836 [INFO] Initialized Rainbow DQN agent with parameters:
+learning_rate=5.6115164153345e-05, gamma=0.9965850010140859, batch_size=32, target_update_freq=594, epsilon_start=0.8005575058716043, epsilon_end=0.0737265320016441, epsilon_decay_steps=52426, memory_size=50000, n_steps=5, n_atoms=101, v_min=-12.128653525516432, v_max=11.479175279631736, seed=42
+2025-04-26 13:38:31,836 [INFO] Agent using device: cuda
+2025-04-26 13:38:43,569 [INFO] Starting Bayesian Optimization with 5 trials
+2025-04-26 13:38:43,577 [INFO] EnvironmentBuilder initialized
+2025-04-26 13:38:43,578 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 13:38:43,579 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 13:38:43,580 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 13:38:43,581 [INFO] Scaling rewards by factor 0.1
+2025-04-26 13:38:43,582 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 13:38:43,582 [INFO] Limiting episode length to 1000 steps
+2025-04-26 13:38:43,583 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 13:38:43,584 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 13:38:43,586 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 13:38:43,586 [INFO] Scaling rewards by factor 0.1
+2025-04-26 13:38:43,586 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 13:38:43,586 [INFO] Limiting episode length to 1000 steps
+2025-04-26 13:38:43,587 [INFO] AgentBuilder initialized
+2025-04-26 13:38:43,587 [INFO] Building agent with parameters: {'learning_rate': 5.6115164153345e-05, 'gamma': 0.9965850010140859, 'batch_size': 32, 'target_update_freq': 594, 'epsilon_start': 0.8005575058716043, 'epsilon_end': 0.0737265320016441, 'epsilon_decay_steps': 52426, 'memory_size': 50000, 'n_steps': 5, 'n_atoms': 101, 'v_min': -12.128653525516432, 'v_max': 11.479175279631736}
+2025-04-26 13:38:43,589 [INFO] Using device: cuda
+2025-04-26 13:38:43,596 [INFO] Initialized PrioritizedReplayBuffer with capacity 50000, alpha=0.6, beta=0.4
+2025-04-26 13:38:43,597 [INFO] Initialized Rainbow DQN agent with parameters:
+learning_rate=5.6115164153345e-05, gamma=0.9965850010140859, batch_size=32, target_update_freq=594, epsilon_start=0.8005575058716043, epsilon_end=0.0737265320016441, epsilon_decay_steps=52426, memory_size=50000, n_steps=5, n_atoms=101, v_min=-12.128653525516432, v_max=11.479175279631736, seed=42
+2025-04-26 13:38:43,597 [INFO] Agent using device: cuda
+2025-04-26 15:06:26,656 [INFO] Using device: cuda
+2025-04-26 15:06:26,657 [INFO] Initialized HPO comparison with environment: CartPole-v1
+2025-04-26 15:06:26,658 [INFO] Trials: 5, Seeds: 2, Budget: 100000
+2025-04-26 15:06:26,666 [INFO] Starting Bayesian Optimization with 5 trials
+2025-04-26 15:06:26,669 [INFO] EnvironmentBuilder initialized
+2025-04-26 15:06:26,704 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 15:06:26,705 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 15:06:26,710 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 15:06:26,711 [INFO] Scaling rewards by factor 0.1
+2025-04-26 15:06:26,712 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 15:06:26,712 [INFO] Limiting episode length to 1000 steps
+2025-04-26 15:06:26,713 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 15:06:26,713 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 15:06:26,714 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 15:06:26,715 [INFO] Scaling rewards by factor 0.1
+2025-04-26 15:06:26,715 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 15:06:26,715 [INFO] Limiting episode length to 1000 steps
+2025-04-26 15:06:26,716 [INFO] AgentBuilder initialized
+2025-04-26 15:06:26,716 [INFO] Building agent with parameters: {'learning_rate': 5.6115164153345e-05, 'gamma': 0.9965850010140859, 'batch_size': 32, 'target_update_freq': 594, 'epsilon_start': 0.8005575058716043, 'epsilon_end': 0.0737265320016441, 'epsilon_decay_steps': 52426, 'memory_size': 50000, 'n_steps': 5, 'n_atoms': 101, 'v_min': -12.128653525516432, 'v_max': 11.479175279631736}
+2025-04-26 15:06:26,719 [INFO] Using device: cuda
+2025-04-26 15:06:27,678 [INFO] Initialized PrioritizedReplayBuffer with capacity 50000, alpha=0.6, beta=0.4
+2025-04-26 15:06:27,682 [INFO] Initialized Rainbow DQN agent with parameters:
+learning_rate=5.6115164153345e-05, gamma=0.9965850010140859, batch_size=32, target_update_freq=594, epsilon_start=0.8005575058716043, epsilon_end=0.0737265320016441, epsilon_decay_steps=52426, memory_size=50000, n_steps=5, n_atoms=101, v_min=-12.128653525516432, v_max=11.479175279631736, seed=42
+2025-04-26 15:06:27,682 [INFO] Agent using device: cuda
+2025-04-26 15:09:48,657 [INFO] Using device: cuda
+2025-04-26 15:09:48,658 [INFO] Initialized HPO comparison with environment: CartPole-v1
+2025-04-26 15:09:48,658 [INFO] Trials: 5, Seeds: 2, Budget: 10000
+2025-04-26 15:09:48,671 [INFO] Starting Bayesian Optimization with 5 trials
+2025-04-26 15:09:48,675 [INFO] EnvironmentBuilder initialized
+2025-04-26 15:09:48,714 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 15:09:48,715 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 15:09:48,717 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 15:09:48,721 [INFO] Scaling rewards by factor 0.1
+2025-04-26 15:09:48,721 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 15:09:48,722 [INFO] Limiting episode length to 1000 steps
+2025-04-26 15:09:48,722 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 15:09:48,723 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 15:09:48,723 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 15:09:48,724 [INFO] Scaling rewards by factor 0.1
+2025-04-26 15:09:48,725 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 15:09:48,725 [INFO] Limiting episode length to 1000 steps
+2025-04-26 15:09:48,726 [INFO] AgentBuilder initialized
+2025-04-26 15:09:48,726 [INFO] Building agent with parameters: {'learning_rate': 5.6115164153345e-05, 'gamma': 0.9965850010140859, 'batch_size': 32, 'target_update_freq': 594, 'epsilon_start': 0.8005575058716043, 'epsilon_end': 0.0737265320016441, 'epsilon_decay_steps': 52426, 'memory_size': 50000, 'n_steps': 5, 'n_atoms': 101, 'v_min': -12.128653525516432, 'v_max': 11.479175279631736}
+2025-04-26 15:09:48,728 [INFO] Using device: cuda
+2025-04-26 15:09:49,687 [INFO] Initialized PrioritizedReplayBuffer with capacity 50000, alpha=0.6, beta=0.4
+2025-04-26 15:09:49,687 [INFO] Initialized Rainbow DQN agent with parameters:
+learning_rate=5.6115164153345e-05, gamma=0.9965850010140859, batch_size=32, target_update_freq=594, epsilon_start=0.8005575058716043, epsilon_end=0.0737265320016441, epsilon_decay_steps=52426, memory_size=50000, n_steps=5, n_atoms=101, v_min=-12.128653525516432, v_max=11.479175279631736, seed=42
+2025-04-26 15:09:49,687 [INFO] Agent using device: cuda
+2025-04-26 15:27:19,191 [INFO] Using device: cuda
+2025-04-26 15:27:19,191 [INFO] Initialized HPO comparison with environment: CartPole-v1
+2025-04-26 15:27:19,191 [INFO] Trials: 5, Seeds: 2, Budget: 1000
+2025-04-26 15:27:19,197 [INFO] Starting Bayesian Optimization with 5 trials
+2025-04-26 15:27:19,204 [INFO] EnvironmentBuilder initialized
+2025-04-26 15:27:19,240 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 15:27:19,240 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 15:27:19,240 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 15:27:19,248 [INFO] Scaling rewards by factor 0.1
+2025-04-26 15:27:19,248 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 15:27:19,248 [INFO] Limiting episode length to 1000 steps
+2025-04-26 15:27:19,248 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 15:27:19,248 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 15:27:19,248 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 15:27:19,248 [INFO] Scaling rewards by factor 0.1
+2025-04-26 15:27:19,252 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 15:27:19,252 [INFO] Limiting episode length to 1000 steps
+2025-04-26 15:27:19,253 [INFO] AgentBuilder initialized
+2025-04-26 15:27:19,253 [INFO] Building agent with parameters: {'learning_rate': 5.6115164153345e-05, 'gamma': 0.9965850010140859, 'batch_size': 32, 'target_update_freq': 594, 'epsilon_start': 0.8005575058716043, 'epsilon_end': 0.0737265320016441, 'epsilon_decay_steps': 52426, 'memory_size': 50000, 'n_steps': 5, 'n_atoms': 101, 'v_min': -12.128653525516432, 'v_max': 11.479175279631736}
+2025-04-26 15:27:19,255 [INFO] Using device: cuda
+2025-04-26 15:27:20,363 [INFO] Initialized PrioritizedReplayBuffer with capacity 50000, alpha=0.6, beta=0.4
+2025-04-26 15:27:20,363 [INFO] Initialized Rainbow DQN agent with parameters:
+learning_rate=5.6115164153345e-05, gamma=0.9965850010140859, batch_size=32, target_update_freq=594, epsilon_start=0.8005575058716043, epsilon_end=0.0737265320016441, epsilon_decay_steps=52426, memory_size=50000, n_steps=5, n_atoms=101, v_min=-12.128653525516432, v_max=11.479175279631736, seed=42
+2025-04-26 15:27:20,366 [INFO] Agent using device: cuda
+2025-04-26 15:37:49,692 [INFO] EnvironmentBuilder initialized
+2025-04-26 15:37:49,693 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 15:37:49,693 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 15:37:49,693 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 15:37:49,693 [INFO] Scaling rewards by factor 0.1
+2025-04-26 15:37:49,693 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 15:37:49,693 [INFO] Limiting episode length to 1000 steps
+2025-04-26 15:37:49,693 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 15:37:49,693 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 15:37:49,697 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 15:37:49,697 [INFO] Scaling rewards by factor 0.1
+2025-04-26 15:37:49,697 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 15:37:49,697 [INFO] Limiting episode length to 1000 steps
+2025-04-26 15:37:49,697 [INFO] AgentBuilder initialized
+2025-04-26 15:37:49,697 [INFO] Building agent with parameters: {'learning_rate': 5.6115164153345e-05, 'gamma': 0.9965850010140859, 'batch_size': 32, 'target_update_freq': 594, 'epsilon_start': 0.8005575058716043, 'epsilon_end': 0.0737265320016441, 'epsilon_decay_steps': 52426, 'memory_size': 50000, 'n_steps': 5, 'n_atoms': 101, 'v_min': -12.128653525516432, 'v_max': 11.479175279631736}
+2025-04-26 15:37:49,697 [INFO] Using device: cuda
+2025-04-26 15:37:49,707 [INFO] Initialized PrioritizedReplayBuffer with capacity 50000, alpha=0.6, beta=0.4
+2025-04-26 15:37:49,707 [INFO] Initialized Rainbow DQN agent with parameters:
+learning_rate=5.6115164153345e-05, gamma=0.9965850010140859, batch_size=32, target_update_freq=594, epsilon_start=0.8005575058716043, epsilon_end=0.0737265320016441, epsilon_decay_steps=52426, memory_size=50000, n_steps=5, n_atoms=101, v_min=-12.128653525516432, v_max=11.479175279631736, seed=43
+2025-04-26 15:37:49,708 [INFO] Agent using device: cuda
+2025-04-26 15:44:30,586 [INFO] Using device: cuda
+2025-04-26 15:44:30,587 [INFO] Initialized HPO comparison with environment: CartPole-v1
+2025-04-26 15:44:30,587 [INFO] Trials: 1, Seeds: 2, Budget: 1000
+2025-04-26 15:44:30,598 [INFO] Starting Bayesian Optimization with 1 trials
+2025-04-26 15:44:30,602 [INFO] EnvironmentBuilder initialized
+2025-04-26 15:44:30,643 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 15:44:30,644 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 15:44:30,649 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 15:44:30,650 [INFO] Scaling rewards by factor 0.1
+2025-04-26 15:44:30,650 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 15:44:30,651 [INFO] Limiting episode length to 1000 steps
+2025-04-26 15:44:30,651 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 15:44:30,652 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 15:44:30,653 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 15:44:30,653 [INFO] Scaling rewards by factor 0.1
+2025-04-26 15:44:30,654 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 15:44:30,654 [INFO] Limiting episode length to 1000 steps
+2025-04-26 15:44:30,655 [INFO] AgentBuilder initialized
+2025-04-26 15:44:30,655 [INFO] Building agent with parameters: {'learning_rate': 5.6115164153345e-05, 'gamma': 0.9965850010140859, 'batch_size': 32, 'target_update_freq': 594, 'epsilon_start': 0.8005575058716043, 'epsilon_end': 0.0737265320016441, 'epsilon_decay_steps': 52426, 'memory_size': 50000, 'n_steps': 5, 'n_atoms': 101, 'v_min': -12.128653525516432, 'v_max': 11.479175279631736}
+2025-04-26 15:44:30,657 [INFO] Using device: cuda
+2025-04-26 15:44:31,791 [INFO] Initialized PrioritizedReplayBuffer with capacity 50000, alpha=0.6, beta=0.4
+2025-04-26 15:44:31,793 [INFO] Initialized Rainbow DQN agent with parameters:
+learning_rate=5.6115164153345e-05, gamma=0.9965850010140859, batch_size=32, target_update_freq=594, epsilon_start=0.8005575058716043, epsilon_end=0.0737265320016441, epsilon_decay_steps=52426, memory_size=50000, n_steps=5, n_atoms=101, v_min=-12.128653525516432, v_max=11.479175279631736, seed=42
+2025-04-26 15:44:31,793 [INFO] Agent using device: cuda
+2025-04-26 15:55:10,451 [INFO] EnvironmentBuilder initialized
+2025-04-26 15:55:10,454 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 15:55:10,456 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 15:55:10,457 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 15:55:10,457 [INFO] Scaling rewards by factor 0.1
+2025-04-26 15:55:10,457 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 15:55:10,457 [INFO] Limiting episode length to 1000 steps
+2025-04-26 15:55:10,457 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 15:55:10,459 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 15:55:10,459 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 15:55:10,459 [INFO] Scaling rewards by factor 0.1
+2025-04-26 15:55:10,459 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 15:55:10,459 [INFO] Limiting episode length to 1000 steps
+2025-04-26 15:55:10,459 [INFO] AgentBuilder initialized
+2025-04-26 15:55:10,459 [INFO] Building agent with parameters: {'learning_rate': 5.6115164153345e-05, 'gamma': 0.9965850010140859, 'batch_size': 32, 'target_update_freq': 594, 'epsilon_start': 0.8005575058716043, 'epsilon_end': 0.0737265320016441, 'epsilon_decay_steps': 52426, 'memory_size': 50000, 'n_steps': 5, 'n_atoms': 101, 'v_min': -12.128653525516432, 'v_max': 11.479175279631736}
+2025-04-26 15:55:10,459 [INFO] Using device: cuda
+2025-04-26 15:55:10,468 [INFO] Initialized PrioritizedReplayBuffer with capacity 50000, alpha=0.6, beta=0.4
+2025-04-26 15:55:10,468 [INFO] Initialized Rainbow DQN agent with parameters:
+learning_rate=5.6115164153345e-05, gamma=0.9965850010140859, batch_size=32, target_update_freq=594, epsilon_start=0.8005575058716043, epsilon_end=0.0737265320016441, epsilon_decay_steps=52426, memory_size=50000, n_steps=5, n_atoms=101, v_min=-12.128653525516432, v_max=11.479175279631736, seed=43
+2025-04-26 15:55:10,468 [INFO] Agent using device: cuda
+2025-04-26 16:05:48,778 [ERROR] Error calculating parameter importances: Cannot evaluate parameter importances with only a single trial.
+2025-04-26 16:05:48,788 [INFO] Bayesian Optimization completed in 1277.57s
+2025-04-26 16:05:48,788 [INFO] Best score: 0.9800
+2025-04-26 16:05:48,791 [INFO] Best params: {'learning_rate': 5.6115164153345e-05, 'gamma': 0.9965850010140859, 'batch_size': 32, 'target_update_freq': 594, 'n_steps': 5, 'epsilon_start': 0.8005575058716043, 'epsilon_end': 0.0737265320016441, 'epsilon_decay_steps': 52426, 'memory_size': 50000, 'n_atoms': 101, 'v_min': -12.128653525516432, 'v_max': 11.479175279631736}
+2025-04-26 16:05:48,803 [INFO] Starting Evolutionary Algorithm with 1 trials
+2025-04-26 16:05:48,803 [INFO] EnvironmentBuilder initialized
+2025-04-26 16:05:48,803 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 16:05:48,803 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 16:05:48,807 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 16:05:48,807 [INFO] Scaling rewards by factor 0.1
+2025-04-26 16:05:48,807 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 16:05:48,807 [INFO] Limiting episode length to 1000 steps
+2025-04-26 16:05:48,807 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 16:05:48,807 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 16:05:48,807 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 16:05:48,807 [INFO] Scaling rewards by factor 0.1
+2025-04-26 16:05:48,811 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 16:05:48,811 [INFO] Limiting episode length to 1000 steps
+2025-04-26 16:05:48,811 [INFO] AgentBuilder initialized
+2025-04-26 16:05:48,811 [INFO] Building agent with parameters: {'learning_rate': 1.1441529886493561e-05, 'gamma': 0.9579565333717276, 'batch_size': 64, 'target_update_freq': 6476, 'epsilon_start': 0.9079760943902279, 'epsilon_end': 0.07918168620781696, 'epsilon_decay_steps': 492697, 'memory_size': 100000, 'n_steps': 3, 'n_atoms': 51, 'v_min': -8.26497706808863, 'v_max': 17.908845703767433}
+2025-04-26 16:05:48,811 [INFO] Using device: cuda
+2025-04-26 16:05:48,816 [INFO] Initialized PrioritizedReplayBuffer with capacity 100000, alpha=0.6, beta=0.4
+2025-04-26 16:05:48,816 [INFO] Initialized Rainbow DQN agent with parameters:
+learning_rate=1.1441529886493561e-05, gamma=0.9579565333717276, batch_size=64, target_update_freq=6476, epsilon_start=0.9079760943902279, epsilon_end=0.07918168620781696, epsilon_decay_steps=492697, memory_size=100000, n_steps=3, n_atoms=51, v_min=-8.26497706808863, v_max=17.908845703767433, seed=42
+2025-04-26 16:05:48,820 [INFO] Agent using device: cuda
+2025-04-26 16:16:22,181 [INFO] EnvironmentBuilder initialized
+2025-04-26 16:16:22,181 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 16:16:22,181 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 16:16:22,181 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 16:16:22,181 [INFO] Scaling rewards by factor 0.1
+2025-04-26 16:16:22,181 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 16:16:22,181 [INFO] Limiting episode length to 1000 steps
+2025-04-26 16:16:22,181 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 16:16:22,181 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 16:16:22,181 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 16:16:22,181 [INFO] Scaling rewards by factor 0.1
+2025-04-26 16:16:22,181 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 16:16:22,181 [INFO] Limiting episode length to 1000 steps
+2025-04-26 16:16:22,181 [INFO] AgentBuilder initialized
+2025-04-26 16:16:22,181 [INFO] Building agent with parameters: {'learning_rate': 1.1441529886493561e-05, 'gamma': 0.9579565333717276, 'batch_size': 64, 'target_update_freq': 6476, 'epsilon_start': 0.9079760943902279, 'epsilon_end': 0.07918168620781696, 'epsilon_decay_steps': 492697, 'memory_size': 100000, 'n_steps': 3, 'n_atoms': 51, 'v_min': -8.26497706808863, 'v_max': 17.908845703767433}
+2025-04-26 16:16:22,189 [INFO] Using device: cuda
+2025-04-26 16:16:22,193 [INFO] Initialized PrioritizedReplayBuffer with capacity 100000, alpha=0.6, beta=0.4
+2025-04-26 16:16:22,193 [INFO] Initialized Rainbow DQN agent with parameters:
+learning_rate=1.1441529886493561e-05, gamma=0.9579565333717276, batch_size=64, target_update_freq=6476, epsilon_start=0.9079760943902279, epsilon_end=0.07918168620781696, epsilon_decay_steps=492697, memory_size=100000, n_steps=3, n_atoms=51, v_min=-8.26497706808863, v_max=17.908845703767433, seed=43
+2025-04-26 16:16:22,195 [INFO] Agent using device: cuda
+2025-04-26 16:26:52,517 [INFO] EnvironmentBuilder initialized
+2025-04-26 16:26:52,518 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 16:26:52,518 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 16:26:52,518 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 16:26:52,518 [INFO] Scaling rewards by factor 0.1
+2025-04-26 16:26:52,518 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 16:26:52,518 [INFO] Limiting episode length to 1000 steps
+2025-04-26 16:26:52,518 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 16:26:52,518 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 16:26:52,522 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 16:26:52,523 [INFO] Scaling rewards by factor 0.1
+2025-04-26 16:26:52,523 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 16:26:52,523 [INFO] Limiting episode length to 1000 steps
+2025-04-26 16:26:52,524 [INFO] AgentBuilder initialized
+2025-04-26 16:26:52,524 [INFO] Building agent with parameters: {'learning_rate': 3.7918542936208e-05, 'gamma': 0.9841462678979775, 'batch_size': 256, 'target_update_freq': 5417, 'epsilon_start': 0.7819499052178033, 'epsilon_end': 0.08006393863015951, 'epsilon_decay_steps': 120140, 'memory_size': 100000, 'n_steps': 3, 'n_atoms': 51, 'v_min': -13.220446695636493, 'v_max': 8.742035738388525}
+2025-04-26 16:26:52,526 [INFO] Using device: cuda
+2025-04-26 16:26:52,530 [INFO] Initialized PrioritizedReplayBuffer with capacity 100000, alpha=0.6, beta=0.4
+2025-04-26 16:26:52,531 [INFO] Initialized Rainbow DQN agent with parameters:
+learning_rate=3.7918542936208e-05, gamma=0.9841462678979775, batch_size=256, target_update_freq=5417, epsilon_start=0.7819499052178033, epsilon_end=0.08006393863015951, epsilon_decay_steps=120140, memory_size=100000, n_steps=3, n_atoms=51, v_min=-13.220446695636493, v_max=8.742035738388525, seed=42
+2025-04-26 16:26:52,531 [INFO] Agent using device: cuda
+2025-04-26 16:59:31,503 [INFO] EnvironmentBuilder initialized
+2025-04-26 16:59:31,503 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 16:59:31,503 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 16:59:31,507 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 16:59:31,507 [INFO] Scaling rewards by factor 0.1
+2025-04-26 16:59:31,507 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 16:59:31,507 [INFO] Limiting episode length to 1000 steps
+2025-04-26 16:59:31,507 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 16:59:31,510 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 16:59:31,511 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 16:59:31,511 [INFO] Scaling rewards by factor 0.1
+2025-04-26 16:59:31,512 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 16:59:31,512 [INFO] Limiting episode length to 1000 steps
+2025-04-26 16:59:31,513 [INFO] AgentBuilder initialized
+2025-04-26 16:59:31,513 [INFO] Building agent with parameters: {'learning_rate': 3.7918542936208e-05, 'gamma': 0.9841462678979775, 'batch_size': 256, 'target_update_freq': 5417, 'epsilon_start': 0.7819499052178033, 'epsilon_end': 0.08006393863015951, 'epsilon_decay_steps': 120140, 'memory_size': 100000, 'n_steps': 3, 'n_atoms': 51, 'v_min': -13.220446695636493, 'v_max': 8.742035738388525}
+2025-04-26 16:59:31,514 [INFO] Using device: cuda
+2025-04-26 16:59:31,520 [INFO] Initialized PrioritizedReplayBuffer with capacity 100000, alpha=0.6, beta=0.4
+2025-04-26 16:59:31,520 [INFO] Initialized Rainbow DQN agent with parameters:
+learning_rate=3.7918542936208e-05, gamma=0.9841462678979775, batch_size=256, target_update_freq=5417, epsilon_start=0.7819499052178033, epsilon_end=0.08006393863015951, epsilon_decay_steps=120140, memory_size=100000, n_steps=3, n_atoms=51, v_min=-13.220446695636493, v_max=8.742035738388525, seed=43
+2025-04-26 16:59:31,521 [INFO] Agent using device: cuda
+2025-04-26 17:17:56,750 [INFO] Using device: cuda
+2025-04-26 17:17:56,758 [INFO] Initialized HPO comparison with environment: CartPole-v1
+2025-04-26 17:17:56,758 [INFO] Trials: 2, Seeds: 2, Budget: 100
+2025-04-26 17:18:02,579 [INFO] Starting Bayesian Optimization with 2 trials
+2025-04-26 17:18:02,586 [INFO] EnvironmentBuilder initialized
+2025-04-26 17:18:02,635 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 17:18:02,638 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 17:18:02,642 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 17:18:02,647 [INFO] Scaling rewards by factor 0.1
+2025-04-26 17:18:02,647 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 17:18:02,647 [INFO] Limiting episode length to 1000 steps
+2025-04-26 17:18:02,647 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 17:18:02,647 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 17:18:02,650 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 17:18:02,650 [INFO] Scaling rewards by factor 0.1
+2025-04-26 17:18:02,651 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 17:18:02,651 [INFO] Limiting episode length to 1000 steps
+2025-04-26 17:18:02,652 [INFO] AgentBuilder initialized
+2025-04-26 17:18:02,652 [INFO] Building agent with parameters: {'learning_rate': 5.6115164153345e-05, 'gamma': 0.9965850010140859, 'batch_size': 32, 'target_update_freq': 594, 'epsilon_start': 0.8005575058716043, 'epsilon_end': 0.0737265320016441, 'epsilon_decay_steps': 52426, 'memory_size': 50000, 'n_steps': 5, 'n_atoms': 101, 'v_min': -12.128653525516432, 'v_max': 11.479175279631736}
+2025-04-26 17:18:02,654 [INFO] Using device: cuda
+2025-04-26 17:18:03,676 [INFO] Initialized PrioritizedReplayBuffer with capacity 50000, alpha=0.6, beta=0.4
+2025-04-26 17:18:03,681 [INFO] Initialized Rainbow DQN agent with parameters:
+learning_rate=5.6115164153345e-05, gamma=0.9965850010140859, batch_size=32, target_update_freq=594, epsilon_start=0.8005575058716043, epsilon_end=0.0737265320016441, epsilon_decay_steps=52426, memory_size=50000, n_steps=5, n_atoms=101, v_min=-12.128653525516432, v_max=11.479175279631736, seed=42
+2025-04-26 17:18:03,681 [INFO] Agent using device: cuda
+2025-04-26 17:18:38,725 [INFO] EnvironmentBuilder initialized
+2025-04-26 17:18:38,725 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 17:18:38,725 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 17:18:38,725 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 17:18:38,725 [INFO] Scaling rewards by factor 0.1
+2025-04-26 17:18:38,725 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 17:18:38,725 [INFO] Limiting episode length to 1000 steps
+2025-04-26 17:18:38,725 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 17:18:38,725 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 17:18:38,725 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 17:18:38,725 [INFO] Scaling rewards by factor 0.1
+2025-04-26 17:18:38,725 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 17:18:38,725 [INFO] Limiting episode length to 1000 steps
+2025-04-26 17:18:38,725 [INFO] AgentBuilder initialized
+2025-04-26 17:18:38,734 [INFO] Building agent with parameters: {'learning_rate': 5.6115164153345e-05, 'gamma': 0.9965850010140859, 'batch_size': 32, 'target_update_freq': 594, 'epsilon_start': 0.8005575058716043, 'epsilon_end': 0.0737265320016441, 'epsilon_decay_steps': 52426, 'memory_size': 50000, 'n_steps': 5, 'n_atoms': 101, 'v_min': -12.128653525516432, 'v_max': 11.479175279631736}
+2025-04-26 17:18:38,735 [INFO] Using device: cuda
+2025-04-26 17:18:38,737 [INFO] Initialized PrioritizedReplayBuffer with capacity 50000, alpha=0.6, beta=0.4
+2025-04-26 17:18:38,737 [INFO] Initialized Rainbow DQN agent with parameters:
+learning_rate=5.6115164153345e-05, gamma=0.9965850010140859, batch_size=32, target_update_freq=594, epsilon_start=0.8005575058716043, epsilon_end=0.0737265320016441, epsilon_decay_steps=52426, memory_size=50000, n_steps=5, n_atoms=101, v_min=-12.128653525516432, v_max=11.479175279631736, seed=43
+2025-04-26 17:18:38,741 [INFO] Agent using device: cuda
+2025-04-26 17:19:15,020 [INFO] EnvironmentBuilder initialized
+2025-04-26 17:19:15,020 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 17:19:15,030 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 17:19:15,030 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 17:19:15,030 [INFO] Scaling rewards by factor 0.1
+2025-04-26 17:19:15,030 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 17:19:15,030 [INFO] Limiting episode length to 1000 steps
+2025-04-26 17:19:15,030 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 17:19:15,030 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 17:19:15,030 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 17:19:15,030 [INFO] Scaling rewards by factor 0.1
+2025-04-26 17:19:15,030 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 17:19:15,030 [INFO] Limiting episode length to 1000 steps
+2025-04-26 17:19:15,030 [INFO] AgentBuilder initialized
+2025-04-26 17:19:15,030 [INFO] Building agent with parameters: {'learning_rate': 3.8234752246751835e-05, 'gamma': 0.9799807918413965, 'batch_size': 256, 'target_update_freq': 5253, 'epsilon_start': 0.7571172192068059, 'epsilon_end': 0.06331731119758383, 'epsilon_decay_steps': 55644, 'memory_size': 50000, 'n_steps': 1, 'n_atoms': 51, 'v_min': -15.43079346239944, 'v_max': 6.465081710095758}
+2025-04-26 17:19:15,030 [INFO] Using device: cuda
+2025-04-26 17:19:15,043 [INFO] Initialized PrioritizedReplayBuffer with capacity 50000, alpha=0.6, beta=0.4
+2025-04-26 17:19:15,045 [INFO] Initialized Rainbow DQN agent with parameters:
+learning_rate=3.8234752246751835e-05, gamma=0.9799807918413965, batch_size=256, target_update_freq=5253, epsilon_start=0.7571172192068059, epsilon_end=0.06331731119758383, epsilon_decay_steps=55644, memory_size=50000, n_steps=1, n_atoms=51, v_min=-15.43079346239944, v_max=6.465081710095758, seed=42
+2025-04-26 17:19:15,045 [INFO] Agent using device: cuda
+2025-04-26 17:19:15,186 [INFO] EnvironmentBuilder initialized
+2025-04-26 17:19:15,186 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 17:19:15,186 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 17:19:15,190 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 17:19:15,190 [INFO] Scaling rewards by factor 0.1
+2025-04-26 17:19:15,190 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 17:19:15,190 [INFO] Limiting episode length to 1000 steps
+2025-04-26 17:19:15,190 [WARNING] Missing dependencies for Atari environments: No module named 'gymnasium.envs.atari'
+2025-04-26 17:19:15,190 [INFO] Attempting to create environment with ID: CartPole-v1
+2025-04-26 17:19:15,190 [INFO] Successfully created environment: CartPole-v1
+2025-04-26 17:19:15,190 [INFO] Scaling rewards by factor 0.1
+2025-04-26 17:19:15,190 [INFO] Initializing observation normalization for shape (4,)
+2025-04-26 17:19:15,190 [INFO] Limiting episode length to 1000 steps
+2025-04-26 17:19:15,190 [INFO] AgentBuilder initialized
+2025-04-26 17:19:15,190 [INFO] Building agent with parameters: {'learning_rate': 3.8234752246751835e-05, 'gamma': 0.9799807918413965, 'batch_size': 256, 'target_update_freq': 5253, 'epsilon_start': 0.7571172192068059, 'epsilon_end': 0.06331731119758383, 'epsilon_decay_steps': 55644, 'memory_size': 50000, 'n_steps': 1, 'n_atoms': 51, 'v_min': -15.43079346239944, 'v_max': 6.465081710095758}
+2025-04-26 17:19:15,190 [INFO] Using device: cuda
+2025-04-26 17:19:15,201 [INFO] Initialized PrioritizedReplayBuffer with capacity 50000, alpha=0.6, beta=0.4
+2025-04-26 17:19:15,201 [INFO] Initialized Rainbow DQN agent with parameters:
+learning_rate=3.8234752246751835e-05, gamma=0.9799807918413965, batch_size=256, target_update_freq=5253, epsilon_start=0.7571172192068059, epsilon_end=0.06331731119758383, epsilon_decay_steps=55644, memory_size=50000, n_steps=1, n_atoms=51, v_min=-15.43079346239944, v_max=6.465081710095758, seed=43
+2025-04-26 17:19:15,201 [INFO] Agent using device: cuda
+2025-04-26 17:19:15,607 [INFO] Bayesian Optimization completed in 72.77s
+2025-04-26 17:19:15,607 [INFO] Best score: 1.1200
+2025-04-26 17:19:15,607 [INFO] Best params: {'learning_rate': 5.6115164153345e-05, 'gamma': 0.9965850010140859, 'batch_size': 32, 'target_update_freq': 594, 'n_steps': 5, 'epsilon_start': 0.8005575058716043, 'epsilon_end': 0.0737265320016441, 'epsilon_decay_steps': 52426, 'memory_size': 50000, 'n_atoms': 101, 'v_min': -12.128653525516432, 'v_max': 11.479175279631736}

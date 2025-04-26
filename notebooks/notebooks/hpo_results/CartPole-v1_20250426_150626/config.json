@@ -1,0 +1,12 @@
+{
+    "env_id": "CartPole-v1",
+    "n_trials": 5,
+    "n_seeds": 2,
+    "budget_per_trial": 100000,
+    "random_seed": 42,
+    "early_stopping_threshold": null,
+    "patience": 3,
+    "use_gpu": true,
+    "device": "cuda",
+    "timestamp": "2025-04-26 15:06:26"
+}

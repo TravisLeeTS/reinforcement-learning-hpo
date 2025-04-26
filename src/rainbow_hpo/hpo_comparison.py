@@ -44,7 +44,7 @@ from ray.tune.schedulers import PopulationBasedTraining
 # Import project modules
 from src.rainbow_hpo.agent_builder import RainbowDQNAgent, AgentBuilder
 from src.rainbow_hpo.env_builder import EnvironmentBuilder
-from src.rainbow_hpo.analyzer import Analyzer
+from src.rainbow_hpo.analyzer import ExperimentAnalyzer
 
 # Configure logging
 os.makedirs("logs", exist_ok=True)
@@ -490,12 +490,16 @@ class HPOComparison:
         logger.info(f"Starting Evolutionary Algorithm with {self.n_trials} trials")
         start_time = time.time()
         
+        # Clean up any existing DEAP creator classes
+        if hasattr(creator, "FitnessMax"):
+            delattr(creator, "FitnessMax")
+        if hasattr(creator, "Individual"):
+            delattr(creator, "Individual")
+        
         # Set up DEAP
-        # Create fitness and individual classes if they don't exist
-        if not hasattr(creator, "FitnessMax"):
-            creator.create("FitnessMax", base.Fitness, weights=(1.0,))
-        if not hasattr(creator, "Individual"):
-            creator.create("Individual", list, fitness=creator.FitnessMax)
+        # Create fitness and individual classes
+        creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+        creator.create("Individual", list, fitness=creator.FitnessMax)
         
         toolbox = base.Toolbox()
         param_space = self.get_param_space()
@@ -1064,7 +1068,7 @@ class HPOComparison:
             Path to the generated report
         """
         # Create analyzer for visualization
-        analyzer = Analyzer(self.base_dir)
+        analyzer = ExperimentAnalyzer(self.base_dir)
         analyzer.load_results()
         
         # Create report directory

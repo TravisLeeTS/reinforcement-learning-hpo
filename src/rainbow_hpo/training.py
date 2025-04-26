@@ -407,7 +407,7 @@ def objective_function(hyperparams: Dict[str, Any], trial_id: int, env_id: str =
     return max(best_eval_reward, final_eval_reward)
 
 
-def train_with_optimal_params(env_id: str = "Pendulum-v1", render: bool = True, output_dir: str = "models"):
+def train_with_optimal_params(env_id: str = "Pendulum-v1", render: bool = True, output_dir: str = "models", run_id: str = None):
     """
     Train agent using the best found hyperparameters.
     
@@ -415,21 +415,25 @@ def train_with_optimal_params(env_id: str = "Pendulum-v1", render: bool = True, 
         env_id: Environment ID
         render: Whether to render the environment
         output_dir: Output directory
+        run_id: Unique identifier for this run
     """
     from agent_builder import AgentBuilder
-    from utils.common import set_seed
+    from utils.common import set_seed, get_context_logger
+    
+    # Get context-aware logger
+    train_logger = get_context_logger("training", run_id=run_id, env_id=env_id, mode="optimal")
     
     # Load best hyperparameters
     hyperparams_path = os.path.join(output_dir, "best_hyperparameters.json")
     
     if not os.path.exists(hyperparams_path):
-        logger.error(f"Best hyperparameters file not found at {hyperparams_path}")
+        train_logger.error(f"Best hyperparameters file not found at {hyperparams_path}")
         return
     
     with open(hyperparams_path, "r") as f:
         best_params = json.load(f)
     
-    logger.info(f"Training with optimal hyperparameters: {best_params}")
+    train_logger.info(f"Training with optimal hyperparameters: {best_params}")
     
     # Create environment
     env_builder = EnvironmentBuilder()
@@ -452,6 +456,9 @@ def train_with_optimal_params(env_id: str = "Pendulum-v1", render: bool = True, 
         seed=seed
     )
     
+    # Create a unique ID for this optimal run
+    optimal_id = f"optimal_{run_id}" if run_id else "optimal"
+    
     # Train agent
     max_episodes = best_params.get("max_episodes", 1000)
     train_agent(
@@ -463,7 +470,7 @@ def train_with_optimal_params(env_id: str = "Pendulum-v1", render: bool = True, 
         eval_freq=50,
         save_freq=100,
         render=render,
-        trial_id="optimal",
+        trial_id=optimal_id,
         output_dir=output_dir
     )
     
@@ -471,7 +478,7 @@ def train_with_optimal_params(env_id: str = "Pendulum-v1", render: bool = True, 
     eval_env.close()
 
 
-def optimize_hyperparameters(n_trials: int = 10, seed: int = 42, env_id: str = "Pendulum-v1", output_dir: str = "models") -> None:
+def optimize_hyperparameters(n_trials: int = 10, seed: int = 42, env_id: str = "Pendulum-v1", output_dir: str = "models", run_id: str = None) -> None:
     """
     Run hyperparameter optimization to find the best hyperparameters.
     
@@ -480,18 +487,22 @@ def optimize_hyperparameters(n_trials: int = 10, seed: int = 42, env_id: str = "
         seed: Random seed for reproducibility
         env_id: Environment ID
         output_dir: Output directory
+        run_id: Unique identifier for this run
     """
     from hpo_engine import HyperparameterOptimizer
-    from utils.common import set_seed
+    from utils.common import set_seed, get_context_logger
     
-    logger.info(f"Starting hyperparameter optimization with {n_trials} trials")
+    # Get context-aware logger for HPO
+    hpo_logger = get_context_logger("hpo", run_id=run_id, env_id=env_id, n_trials=n_trials)
+    hpo_logger.info(f"Starting hyperparameter optimization with {n_trials} trials")
     set_seed(seed)
     
     # Create optimizer
     optimizer = HyperparameterOptimizer(
         objective_fn=objective_function,
         env_id=env_id,
-        output_dir=output_dir
+        output_dir=output_dir,
+        run_id=run_id
     )
     
     # Run optimization
@@ -504,14 +515,15 @@ def optimize_hyperparameters(n_trials: int = 10, seed: int = 42, env_id: str = "
         "best_value": best_value,
         "env_id": env_id,
         "n_trials": n_trials,
-        "seed": seed
+        "seed": seed,
+        "run_id": run_id
     }
     
     with open(best_params_path, "w") as f:
         json.dump(best_result_dict, f, indent=4)
     
-    logger.info(f"Best hyperparameters saved to {best_params_path}")
-    logger.info(f"Best value: {best_value}")
-    logger.info(f"Best parameters: {best_params}")
+    hpo_logger.info(f"Best hyperparameters saved to {best_params_path}")
+    hpo_logger.info(f"Best value: {best_value}")
+    hpo_logger.info(f"Best parameters: {best_params}")
     
     return best_params, best_value

@@ -20,7 +20,6 @@ from pathlib import Path
 from typing import Dict, Any, List, Tuple, Optional, Union, Callable
 from datetime import datetime
 from tqdm import tqdm
-import optuna
 import ray
 from ray import tune
 from ray.tune.schedulers import PopulationBasedTraining
@@ -31,7 +30,7 @@ from deap import base, creator, tools, algorithms
 from agent_builder import RainbowDQNAgent, AgentBuilder
 from env_builder import EnvironmentBuilder
 from hpo_engine import HyperparameterOptimizer
-from analyzer import Analyzer
+from analyzer import ExperimentAnalyzer
 
 # Configure logging
 os.makedirs("logs", exist_ok=True)
@@ -369,6 +368,13 @@ class BayesianOptimizationStrategy(BaseHPOStrategy):
             config: Experiment configuration
         """
         super().__init__(config, "BayesianOptimization")
+        # Check for Optuna availability at init
+        try:
+            import optuna
+            self.optuna_available = True
+        except ImportError:
+            self.optuna_available = False
+            logger.error("Optuna not available. Install with 'pip install optuna'")
     
     def _create_optuna_objective(self, trial_idx: int) -> Callable:
         """
@@ -459,6 +465,21 @@ class BayesianOptimizationStrategy(BaseHPOStrategy):
         logger.info(f"Running Bayesian Optimization for {self.config.n_trials} trials")
         start_time = time.time()
         
+        # Check if Optuna is available
+        if not self.optuna_available:
+            try:
+                import optuna
+                self.optuna_available = True
+            except ImportError:
+                logger.error("Optuna not available. Cannot perform Bayesian optimization.")
+                logger.error("Install with 'pip install optuna'")
+                # Return empty results as fallback
+                self.runtime = time.time() - start_time
+                return {}, float('-inf')
+        
+        # Import here to ensure we have the module
+        import optuna
+        
         # Create study
         study = optuna.create_study(
             direction="maximize",
@@ -473,10 +494,19 @@ class BayesianOptimizationStrategy(BaseHPOStrategy):
         # Run trials
         for trial_idx in range(self.config.n_trials):
             objective = self._create_optuna_objective(trial_idx)
-            study.optimize(objective, n_trials=1)
+            try:
+                study.optimize(objective, n_trials=1)
+            except Exception as e:
+                logger.error(f"Error in Bayesian optimization trial {trial_idx}: {e}")
+                continue
         
         # Calculate runtime
         self.runtime = time.time() - start_time
+        
+        # If we have no successful trials, return empty results
+        if not study.trials or len(study.trials) == 0:
+            logger.error("No successful Bayesian optimization trials. Check the logs for errors.")
+            return {}, float('-inf')
         
         # Get best params and score
         self.best_params = study.best_params
@@ -1351,7 +1381,7 @@ def run_experiment(args: argparse.Namespace) -> None:
         strategies.append("pbt")
     
     # Analyze and compare results
-    analyzer = Analyzer(results_dir=results_dir)
+    analyzer = ExperimentAnalyzer(results_dir=results_dir)
     analyzer.load_results(strategies)
     
     # Generate comparison plots

@@ -6,15 +6,23 @@ Implements wrappers and environment setup logic with inspiration from DI-engine.
 import gymnasium as gym
 import numpy as np
 import logging
+import os
 from typing import Optional, Dict, Any, Tuple, List, Union
 from gymnasium.wrappers import AtariPreprocessing
 # Removed problematic import and implementing our own FrameStack
+
+# Determine project root directory
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+log_dir = os.path.join(project_root, "logs")
+
+# Create logs directory if it doesn't exist
+os.makedirs(log_dir, exist_ok=True)
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[logging.FileHandler("logs/env_builder.log"), logging.StreamHandler()]
+    handlers=[logging.FileHandler(os.path.join(log_dir, "env_builder.log")), logging.StreamHandler()]
 )
 logger = logging.getLogger(__name__)
 
@@ -313,13 +321,67 @@ class EnvironmentBuilder:
         Returns:
             Configured Gym environment
         """
-        # Create base environment
-        env = gym.make(env_id, render_mode=render_mode)
+        try:
+            # Try to import required modules at runtime
+            import ale_py
+            import gymnasium.envs.atari
+        except ImportError as e:
+            logger.warning(f"Missing dependencies for Atari environments: {e}")
+            
+        # Handle different environment formats
+        env_mappings = {
+            "PongNoFrameskip-v4": ["PongNoFrameskip-v4", "ALE/Pong-v5", "ALE/Pong-v0"],
+            "BreakoutNoFrameskip-v4": ["BreakoutNoFrameskip-v4", "ALE/Breakout-v5", "ALE/Breakout-v0"],
+            "SpaceInvadersNoFrameskip-v4": ["SpaceInvadersNoFrameskip-v4", "ALE/SpaceInvaders-v5", "ALE/SpaceInvaders-v0"],
+        }
         
-        logger.info(f"Created environment: {env_id}")
+        # If this is a known environment, try different variants
+        try_ids = [env_id]
+        if env_id in env_mappings:
+            try_ids = env_mappings[env_id]
+        
+        # Try each environment ID
+        env = None
+        last_exception = None
+        
+        for try_id in try_ids:
+            try:
+                logger.info(f"Attempting to create environment with ID: {try_id}")
+                env = gym.make(try_id, render_mode=render_mode)
+                logger.info(f"Successfully created environment: {try_id}")
+                break
+            except Exception as e:
+                last_exception = e
+                logger.warning(f"Failed to create environment with ID {try_id}: {e}")
+                
+        # If still no environment, try one last approach
+        if env is None:
+            try:
+                # For Atari environments, we might need to install ROMs
+                if "Pong" in env_id or "Breakout" in env_id or "SpaceInvaders" in env_id:
+                    logger.info("Attempting to install Atari ROMs...")
+                    try:
+                        import subprocess
+                        subprocess.run(["python", "-m", "ale_py.import_roms", "--install-dir", "roms"], 
+                                      check=False, capture_output=True)
+                        # Try again with the first ID
+                        env = gym.make(try_ids[0], render_mode=render_mode)
+                        logger.info(f"Successfully created environment after ROM installation: {try_ids[0]}")
+                    except Exception as rom_error:
+                        logger.error(f"ROM installation failed: {rom_error}")
+            except Exception as final_error:
+                logger.error(f"Final environment creation attempt failed: {final_error}")
+                
+        if env is None:
+            error_msg = f"Failed to create any environment using ID {env_id}"
+            logger.error(error_msg)
+            if last_exception:
+                raise type(last_exception)(f"{error_msg}. Please make sure you have installed gymnasium[atari,accept-rom-license] and run `python -m ale_py.import_roms`")
+            else:
+                raise ValueError(error_msg)
         
         # Apply wrappers based on environment type
-        if "Atari" in env_id or env_id.startswith("ALE/"):
+        if any(x in env_id for x in ["NoFrameskip", "Pong", "Breakout", "SpaceInvaders", "ALE"]):
             env = self._apply_atari_wrappers(env)
         
         # Apply general wrappers

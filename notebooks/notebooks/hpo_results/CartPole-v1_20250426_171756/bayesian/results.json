@@ -1,0 +1,220 @@
+{
+    "method": "Bayesian Optimization",
+    "best_params": {
+        "learning_rate": 5.6115164153345e-05,
+        "gamma": 0.9965850010140859,
+        "batch_size": 32,
+        "target_update_freq": 594,
+        "n_steps": 5,
+        "epsilon_start": 0.8005575058716043,
+        "epsilon_end": 0.0737265320016441,
+        "epsilon_decay_steps": 52426,
+        "memory_size": 50000,
+        "n_atoms": 101,
+        "v_min": -12.128653525516432,
+        "v_max": 11.479175279631736
+    },
+    "best_score": 1.12,
+    "runtime": 72.76585984230042,
+    "total_trials": 2,
+    "all_results": [
+        {
+            "trial_id": 0,
+            "hyperparams": {
+                "learning_rate": 5.6115164153345e-05,
+                "gamma": 0.9965850010140859,
+                "batch_size": 32,
+                "target_update_freq": 594,
+                "n_steps": 5,
+                "epsilon_start": 0.8005575058716043,
+                "epsilon_end": 0.0737265320016441,
+                "epsilon_decay_steps": 52426,
+                "memory_size": 50000,
+                "n_atoms": 101,
+                "v_min": -12.128653525516432,
+                "v_max": 11.479175279631736
+            },
+            "mean_reward": 1.12,
+            "std_reward": 0.19000000000000006,
+            "variance": 0.03610000000000002,
+            "mean_steps_to_threshold": null,
+            "mean_training_time": 35.6599782705307,
+            "mean_memory_usage": 952.392578125,
+            "all_rewards": [
+                1.31,
+                0.9299999999999999
+            ],
+            "detailed_metrics": {
+                "per_seed": [
+                    {
+                        "mean_reward": 1.31,
+                        "training_time": 35.04344725608826,
+                        "episodes_completed": 5,
+                        "max_memory_mb": 714.890625,
+                        "steps_to_threshold": null,
+                        "evaluation_rewards": [],
+                        "episode_rewards": [
+                            1.2,
+                            1.5000000000000002,
+                            3.600000000000002,
+                            2.0000000000000004,
+                            0.8999999999999999
+                        ],
+                        "mean_episode_length": 20.0
+                    },
+                    {
+                        "mean_reward": 0.9299999999999999,
+                        "training_time": 36.276509284973145,
+                        "episodes_completed": 6,
+                        "max_memory_mb": 1189.89453125,
+                        "steps_to_threshold": null,
+                        "evaluation_rewards": [],
+                        "episode_rewards": [
+                            1.2,
+                            1.8000000000000005,
+                            2.2000000000000006,
+                            1.3,
+                            1.8000000000000005,
+                            1.3
+                        ],
+                        "mean_episode_length": 16.666666666666668
+                    }
+                ],
+                "aggregate": {
+                    "mean_reward": 1.12,
+                    "std_reward": 0.19000000000000006,
+                    "variance": 0.03610000000000002,
+                    "steps_to_threshold": null,
+                    "rewards_per_seed": [
+                        1.31,
+                        0.9299999999999999
+                    ]
+                }
+            }
+        },
+        {
+            "trial_id": 1,
+            "hyperparams": {
+                "learning_rate": 3.8234752246751835e-05,
+                "gamma": 0.9799807918413965,
+                "batch_size": 256,
+                "target_update_freq": 5253,
+                "n_steps": 1,
+                "epsilon_start": 0.7571172192068059,
+                "epsilon_end": 0.06331731119758383,
+                "epsilon_decay_steps": 55644,
+                "memory_size": 50000,
+                "n_atoms": 51,
+                "v_min": -15.43079346239944,
+                "v_max": 6.465081710095758
+            },
+            "mean_reward": 0.9424999999999998,
+            "std_reward": 0.0024999999999999467,
+            "variance": 6.2499999999997335e-06,
+            "mean_steps_to_threshold": null,
+            "mean_training_time": 0.14156079292297363,
+            "mean_memory_usage": 1190.05859375,
+            "all_rewards": [
+                0.9449999999999997,
+                0.9399999999999998
+            ],
+            "detailed_metrics": {
+                "per_seed": [
+                    {
+                        "mean_reward": 0.9449999999999997,
+                        "training_time": 0.14071393013000488,
+                        "episodes_completed": 5,
+                        "max_memory_mb": 1190.046875,
+                        "steps_to_threshold": null,
+                        "evaluation_rewards": [],
+                        "episode_rewards": [
+                            1.8000000000000005,
+                            1.2,
+                            2.2000000000000006,
+                            2.700000000000001,
+                            1.3
+                        ],
+                        "mean_episode_length": 20.0
+                    },
+                    {
+                        "mean_reward": 0.9399999999999998,
+                        "training_time": 0.14240765571594238,
+                        "episodes_completed": 2,
+                        "max_memory_mb": 1190.0703125,
+                        "steps_to_threshold": null,
+                        "evaluation_rewards": [],
+                        "episode_rewards": [
+                            5.099999999999998,
+                            1.3
+                        ],
+                        "mean_episode_length": 50.0
+                    }
+                ],
+                "aggregate": {
+                    "mean_reward": 0.9424999999999998,
+                    "std_reward": 0.0024999999999999467,
+                    "variance": 6.2499999999997335e-06,
+                    "steps_to_threshold": null,
+                    "rewards_per_seed": [
+                        0.9449999999999997,
+                        0.9399999999999998
+                    ]
+                }
+            }
+        }
+    ],
+    "param_importances": {
+        "n_atoms": 0.21428571428571427,
+        "v_min": 0.14285714285714304,
+        "v_max": 0.14285714285714285,
+        "n_steps": 0.14285714285714285,
+        "learning_rate": 0.14285714285714285,
+        "gamma": 0.07142857142857142,
+        "batch_size": 0.07142857142857142,
+        "target_update_freq": 0.03571428571428571,
+        "epsilon_decay_steps": 0.03571428571428568,
+        "memory_size": 0.0,
+        "epsilon_start": 0.0,
+        "epsilon_end": 0.0
+    },
+    "all_trials": [
+        {
+            "trial_id": 0,
+            "params": {
+                "learning_rate": 5.6115164153345e-05,
+                "gamma": 0.9965850010140859,
+                "batch_size": 32,
+                "target_update_freq": 594,
+                "n_steps": 5,
+                "epsilon_start": 0.8005575058716043,
+                "epsilon_end": 0.0737265320016441,
+                "epsilon_decay_steps": 52426,
+                "memory_size": 50000,
+                "n_atoms": 101,
+                "v_min": -12.128653525516432,
+                "v_max": 11.479175279631736
+            },
+            "value": 1.12,
+            "state": "COMPLETE"
+        },
+        {
+            "trial_id": 1,
+            "params": {
+                "learning_rate": 3.8234752246751835e-05,
+                "gamma": 0.9799807918413965,
+                "batch_size": 256,
+                "target_update_freq": 5253,
+                "n_steps": 1,
+                "epsilon_start": 0.7571172192068059,
+                "epsilon_end": 0.06331731119758383,
+                "epsilon_decay_steps": 55644,
+                "memory_size": 50000,
+                "n_atoms": 51,
+                "v_min": -15.43079346239944,
+                "v_max": 6.465081710095758
+            },
+            "value": 0.9424999999999998,
+            "state": "COMPLETE"
+        }
+    ]
+}

@@ -12,7 +12,7 @@ from typing import Dict, List, Any, Optional, Tuple, Union
 import matplotlib.pyplot as plt
 from pathlib import Path
 
-from utils.visualization import (
+from .utils.visualization import (
     plot_training_curve, 
     plot_loss_curve, 
     plot_hyperparameter_comparison, 

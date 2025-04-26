@@ -19,10 +19,17 @@ from functools import partial
 from dataclasses import dataclass
 
 # Configure logging
+# Get project root directory
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+log_dir = os.path.join(project_root, "logs")
+
+# Create logs directory if it doesn't exist
+os.makedirs(log_dir, exist_ok=True)
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[logging.FileHandler("logs/agent_builder.log"), logging.StreamHandler()]
+    handlers=[logging.FileHandler(os.path.join(log_dir, "agent_builder.log")), logging.StreamHandler()]
 )
 logger = logging.getLogger(__name__)
 
@@ -81,6 +88,115 @@ class NoisyLinear(nn.Module):
         return nn.functional.linear(x, weight, bias)
 
 
+class RainbowMLP(nn.Module):
+    """
+    Neural network for the Rainbow DQN algorithm for vector-based environments.
+    Uses MLP architecture instead of CNN for environments with vector observations.
+    """
+    
+    def __init__(
+        self,
+        input_dim: int,
+        action_dim: int,
+        n_atoms: int = 51,
+        v_min: float = -10.0,
+        v_max: float = 10.0,
+        use_noisy: bool = True,  # Flag to use noisy networks
+    ):
+        """
+        Initialize the Rainbow MLP network.
+        
+        Args:
+            input_dim: Dimension of the input vector
+            action_dim: Number of possible actions
+            n_atoms: Number of atoms for distributional RL
+            v_min: Minimum value for distributional RL
+            v_max: Maximum value for distributional RL
+            use_noisy: Whether to use NoisyNet for exploration
+        """
+        super().__init__()
+        
+        self.action_dim = action_dim
+        self.n_atoms = n_atoms
+        self.v_min = v_min
+        self.v_max = v_max
+        self.support = torch.linspace(v_min, v_max, n_atoms)
+        self.delta_z = (v_max - v_min) / (n_atoms - 1)
+        self.use_noisy = use_noisy
+        
+        # Choose between standard linear layers or noisy layers based on the flag
+        if use_noisy:
+            # Value stream with noisy layers (Dueling architecture)
+            self.value_stream = nn.Sequential(
+                NoisyLinear(input_dim, 128),
+                nn.ReLU(),
+                NoisyLinear(128, 128),
+                nn.ReLU(),
+                NoisyLinear(128, n_atoms)
+            )
+            
+            # Advantage stream with noisy layers (Dueling architecture)
+            self.advantage_stream = nn.Sequential(
+                NoisyLinear(input_dim, 128),
+                nn.ReLU(),
+                NoisyLinear(128, 128),
+                nn.ReLU(),
+                NoisyLinear(128, action_dim * n_atoms)
+            )
+        else:
+            # Standard value stream (Dueling architecture)
+            self.value_stream = nn.Sequential(
+                nn.Linear(input_dim, 128),
+                nn.ReLU(),
+                nn.Linear(128, 128),
+                nn.ReLU(),
+                nn.Linear(128, n_atoms)
+            )
+            
+            # Standard advantage stream (Dueling architecture)
+            self.advantage_stream = nn.Sequential(
+                nn.Linear(input_dim, 128),
+                nn.ReLU(),
+                nn.Linear(128, 128),
+                nn.ReLU(),
+                nn.Linear(128, action_dim * n_atoms)
+            )
+        
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Forward pass through the network.
+        
+        Args:
+            x: Input tensor
+            
+        Returns:
+            Probability distribution over atoms for each action
+        """
+        batch_size = x.size(0)
+        
+        # Dueling architecture
+        values = self.value_stream(x).view(batch_size, 1, self.n_atoms)
+        advantages = self.advantage_stream(x).view(batch_size, self.action_dim, self.n_atoms)
+        
+        # Combine value and advantage streams (Dueling)
+        q_atoms = values + advantages - advantages.mean(dim=1, keepdim=True)
+        
+        # Apply softmax to get probabilities over atoms
+        q_dist = torch.softmax(q_atoms, dim=2)
+        
+        return q_dist
+    
+    def reset_noise(self):
+        """Reset noise for all noisy layers in the network"""
+        if not self.use_noisy:
+            return
+            
+        # Reset noise for all NoisyLinear layers
+        for module in self.modules():
+            if isinstance(module, NoisyLinear):
+                module.reset_noise()
+
+
 class RainbowNetwork(nn.Module):
     """
     Neural network for the Rainbow DQN algorithm.
@@ -100,7 +216,7 @@ class RainbowNetwork(nn.Module):
         Initialize the Rainbow network.
         
         Args:
-            input_shape: Shape of the input observations (channels, height, width)
+            input_shape: Shape of the input observations (channels, height, width) or (vector_dim,)
             action_dim: Number of possible actions
             n_atoms: Number of atoms for distributional RL
             v_min: Minimum value for distributional RL
@@ -117,48 +233,94 @@ class RainbowNetwork(nn.Module):
         self.delta_z = (v_max - v_min) / (n_atoms - 1)
         self.use_noisy = use_noisy
         
-        # Convolutional layers
-        self.conv = nn.Sequential(
-            nn.Conv2d(input_shape[0], 32, kernel_size=8, stride=4),
-            nn.ReLU(),
-            nn.Conv2d(32, 64, kernel_size=4, stride=2),
-            nn.ReLU(),
-            nn.Conv2d(64, 64, kernel_size=3, stride=1),
-            nn.ReLU()
-        )
+        # Check if input is a vector or an image
+        self.is_vector_env = len(input_shape) == 1
         
-        # Calculate the size of the convolution output
-        conv_output_size = self._get_conv_output_size(input_shape)
-        
-        # Choose between standard linear layers or noisy layers based on the flag
-        if use_noisy:
-            # Value stream with noisy layers (Dueling architecture)
-            self.value_stream = nn.Sequential(
-                NoisyLinear(conv_output_size, 512),
-                nn.ReLU(),
-                NoisyLinear(512, n_atoms)
-            )
+        if self.is_vector_env:
+            # For vector-based environments like CartPole
+            input_dim = input_shape[0]
             
-            # Advantage stream with noisy layers (Dueling architecture)
-            self.advantage_stream = nn.Sequential(
-                NoisyLinear(conv_output_size, 512),
-                nn.ReLU(),
-                NoisyLinear(512, action_dim * n_atoms)
-            )
+            # Choose between standard linear layers or noisy layers based on the flag
+            if use_noisy:
+                # Value stream with noisy layers (Dueling architecture)
+                self.value_stream = nn.Sequential(
+                    NoisyLinear(input_dim, 128),
+                    nn.ReLU(),
+                    NoisyLinear(128, 128),
+                    nn.ReLU(),
+                    NoisyLinear(128, n_atoms)
+                )
+                
+                # Advantage stream with noisy layers (Dueling architecture)
+                self.advantage_stream = nn.Sequential(
+                    NoisyLinear(input_dim, 128),
+                    nn.ReLU(),
+                    NoisyLinear(128, 128),
+                    nn.ReLU(),
+                    NoisyLinear(128, action_dim * n_atoms)
+                )
+            else:
+                # Standard value stream (Dueling architecture)
+                self.value_stream = nn.Sequential(
+                    nn.Linear(input_dim, 128),
+                    nn.ReLU(),
+                    nn.Linear(128, 128),
+                    nn.ReLU(),
+                    nn.Linear(128, n_atoms)
+                )
+                
+                # Standard advantage stream (Dueling architecture)
+                self.advantage_stream = nn.Sequential(
+                    nn.Linear(input_dim, 128),
+                    nn.ReLU(),
+                    nn.Linear(128, 128),
+                    nn.ReLU(),
+                    nn.Linear(128, action_dim * n_atoms)
+                )
         else:
-            # Standard value stream (Dueling architecture)
-            self.value_stream = nn.Sequential(
-                nn.Linear(conv_output_size, 512),
+            # For image-based environments like Atari
+            # Convolutional layers
+            self.conv = nn.Sequential(
+                nn.Conv2d(input_shape[0], 32, kernel_size=8, stride=4),
                 nn.ReLU(),
-                nn.Linear(512, n_atoms)
+                nn.Conv2d(32, 64, kernel_size=4, stride=2),
+                nn.ReLU(),
+                nn.Conv2d(64, 64, kernel_size=3, stride=1),
+                nn.ReLU()
             )
             
-            # Standard advantage stream (Dueling architecture)
-            self.advantage_stream = nn.Sequential(
-                nn.Linear(conv_output_size, 512),
-                nn.ReLU(),
-                nn.Linear(512, action_dim * n_atoms)
-            )
+            # Calculate the size of the convolution output - ONLY for image-based environments
+            conv_output_size = self._get_conv_output_size(input_shape)
+            
+            # Choose between standard linear layers or noisy layers based on the flag
+            if use_noisy:
+                # Value stream with noisy layers (Dueling architecture)
+                self.value_stream = nn.Sequential(
+                    NoisyLinear(conv_output_size, 512),
+                    nn.ReLU(),
+                    NoisyLinear(512, n_atoms)
+                )
+                
+                # Advantage stream with noisy layers (Dueling architecture)
+                self.advantage_stream = nn.Sequential(
+                    NoisyLinear(conv_output_size, 512),
+                    nn.ReLU(),
+                    NoisyLinear(512, action_dim * n_atoms)
+                )
+            else:
+                # Standard value stream (Dueling architecture)
+                self.value_stream = nn.Sequential(
+                    nn.Linear(conv_output_size, 512),
+                    nn.ReLU(),
+                    nn.Linear(512, n_atoms)
+                )
+                
+                # Standard advantage stream (Dueling architecture)
+                self.advantage_stream = nn.Sequential(
+                    nn.Linear(conv_output_size, 512),
+                    nn.ReLU(),
+                    nn.Linear(512, action_dim * n_atoms)
+                )
 
     def _get_conv_output_size(self, input_shape: Tuple[int, ...]) -> int:
         """
@@ -185,13 +347,17 @@ class RainbowNetwork(nn.Module):
         """
         batch_size = x.size(0)
         
-        # Get convolutional features
-        conv_features = self.conv(x)
-        conv_features = conv_features.view(batch_size, -1)
+        if self.is_vector_env:
+            # Direct pass for vector inputs (no convolution)
+            features = x
+        else:
+            # Get convolutional features for image inputs
+            features = self.conv(x)
+            features = features.view(batch_size, -1)
         
         # Dueling architecture
-        values = self.value_stream(conv_features).view(batch_size, 1, self.n_atoms)
-        advantages = self.advantage_stream(conv_features).view(batch_size, self.action_dim, self.n_atoms)
+        values = self.value_stream(features).view(batch_size, 1, self.n_atoms)
+        advantages = self.advantage_stream(features).view(batch_size, self.action_dim, self.n_atoms)
         
         # Combine value and advantage streams (Dueling)
         q_atoms = values + advantages - advantages.mean(dim=1, keepdim=True)
@@ -689,7 +855,8 @@ class RainbowDQNAgent:
         actions = torch.tensor(actions, dtype=torch.long).to(self.device)
         rewards = torch.tensor(rewards, dtype=torch.float32).to(self.device)
         next_states = torch.tensor(next_states, dtype=torch.float32).to(self.device)
-        dones = torch.tensor(dones, dtype=torch.bool).to(self.device)
+        # Change dtype from bool to float for the dones tensor to allow subtraction
+        dones = torch.tensor(dones, dtype=torch.float32).to(self.device)
         weights = torch.tensor(weights, dtype=torch.float32).to(self.device)
         
         # Compute current Q distributions
@@ -911,6 +1078,8 @@ class AgentBuilder:
         
         best_eval_reward = float('-inf')
         no_improvement_count = 0
+        early_stopping_patience = early_stopping_patience
+        early_stopping_threshold = early_stopping_threshold
         early_stopped = False
         start_time = time.time()
         
